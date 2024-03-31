@@ -5,7 +5,7 @@ from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 from PIL import Image
 
-from img_processing import img_processing as imgp
+from img_processing import img_processing as imgp, extractor
 
 
 def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='double', save_result=(False, None)):
@@ -14,7 +14,7 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
 
     pages = []
     if page == 'double':
-        pages = imgp.separate_pages(resized_image, ksize=line_ksize)
+        pages = extractor.separate_pages(resized_image, ksize=line_ksize)
         # cv2.imshow("Double pages: first page", pages[0])
         # cv2.imshow("Double pages: second page", pages[1])
     elif page == 'single':
@@ -33,7 +33,7 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
         result = ""
 
         if mode == 'line':
-            lines = imgp.detect_lines(page, ksize=line_ksize, show_result=False)[0]
+            lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)[0]
             for line in lines:
                 angle = get_angle(line)
                 line = rotate(line, angle)
@@ -41,19 +41,19 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
                 s = detector.predict(line_img)
                 result += s + "\n"
 
-        elif mode == 'line-word':
-            lines = imgp.detect_lines(page, ksize=line_ksize, show_result=False)[0]
-            for line in lines:
-                words = imgp.detect_words(line, ksize=word_ksize, show_result=False)[0]
-                for word in words:
-                    word_img = Image.fromarray(word)
-                    s = detector.predict(word_img)
-                    result += s + " "
-                result += "\n"
+        # elif mode == 'line-word':
+        #     lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)[0]
+        #     for line in lines:
+        #         words = extractor.detect_words(line, ksize=word_ksize, show_result=False)[0]
+        #         for word in words:
+        #             word_img = Image.fromarray(word)
+        #             s = detector.predict(word_img)
+        #             result += s + " "
+        #         result += "\n"
 
         elif mode == 'word':
             # lines = imgp.detect_lines(page, ksize=line_ksize, show_result=False)[0]
-            words = imgp.extract_words(page, ksize=word_ksize, show_result=True)
+            words = extractor.detect_words(page, ksize=word_ksize, show_result=False)[0]
             for word in words:
                 word_img = Image.fromarray(word)
                 s = detector.predict(word_img)
