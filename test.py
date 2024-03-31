@@ -18,7 +18,7 @@ ksize = (8, 2)
 # Resize image for better results
 image = imgp.resize_image(image, new_width=1200)
 # regions = imgp.detect_lines(image, ksize=ksize, show_result=True)
-image0 = imgp.preprocess_image(image, ksize)
+image0 = imgp.adaptive_thresholding(image, ksize)
 # cv2.imshow("Preprocessed image", image0)
 
 pages = imgp.separate_pages(image, ksize=ksize)

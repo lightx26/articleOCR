@@ -16,7 +16,7 @@ def detect_lines(image, ksize=(8, 2), show_result=False):
     :param show_result:
     :return: A list of images contains text line (cut from original image) and a list of coordinates of the rectangle bounding each line
     '''
-    preprocessed_image = imgp.preprocess_image(image, ksize, blocksize=251)
+    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=251)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
     dilated = cv2.dilate(255 - preprocessed_image, kernel, iterations=2)
@@ -49,7 +49,7 @@ def extract_lines(image, ksize=(8, 2)):
     :param ksize: kernel size for dilation (x: horizontal, y: vertical)
     :return: A list of images (black background) containing the extracted lines (white text)
     '''
-    preprocessed_image = 255 - imgp.preprocess_image(image, ksize, blocksize=251)
+    preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=251)
 
     dilated_image = cv2.dilate(preprocessed_image, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
 

@@ -1,11 +1,5 @@
-import random
-import string
-
 import cv2
 import numpy as np
-
-
-# import pytesseract
 
 
 def resize_image(image, scale_percent=None, new_width=1000):
@@ -19,29 +13,18 @@ def resize_image(image, scale_percent=None, new_width=1000):
     return cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
 
-def preprocess_image_global(image, ksize):
+def global_thresholding(image, ksize):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_OTSU)
 
-    # random_string1 = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-    # cv2.imshow(random_string1, thresh_image)
-
-    # Display the image
-    # random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-    # cv2.imshow(random_string, dst)
     return thresh_image
 
 
-def preprocess_image(image, ksize, blocksize=251):
+def adaptive_thresholding(image, blocksize=251):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
     thresh_image = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, 2)
-
-    # thresh_image = cv2.threshold((gray_image + thresh_image)//2, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-    # random_string1 = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-    # cv2.imshow(random_string1, 255 - thresh_image)
 
     return thresh_image
 
@@ -76,119 +59,6 @@ def filter_contours(contours, filter_object):
                 filtered_contours.append(cnt)
 
     return filtered_contours
-
-
-# def detect_lines(image, ksize=(8, 2), show_result=False):
-#     preprocessed_image = preprocess_image(image, ksize, blocksize=251)
-#
-#     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
-#     dilated = cv2.dilate(255 - preprocessed_image, kernel, iterations=2)
-#
-#     contours = find_contours(dilated)
-#     line_contours = filter_contours(contours, filter_object="lines")
-#     line_contours = sort_contours(line_contours, method="top-to-bottom")[0]
-#
-#     regions = []
-#     regions_coor = []
-#
-#     image2 = image.copy()
-#
-#     for contour in line_contours:
-#         x, y, w, h = cv2.boundingRect(contour)
-#         regions_coor.append((x, y, w, h))
-#         cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#         regions.append(image[y:y + h, x:x + w])
-#
-#     if show_result:
-#         cv2.imshow("Lines detected", image2)
-#
-#     return regions, regions_coor
-#
-#
-# def detect_words(image, ksize=(2, 2), show_result=False):
-#     preprocessed_image = preprocess_image(image, ksize, blocksize=101)
-#
-#     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
-#     dilated = cv2.dilate(255 - preprocessed_image, kernel, iterations=1)
-#
-#     contours = find_contours(dilated)
-#     word_contours = filter_contours(contours, filter_object="words")
-#     word_contours = sort_contours(word_contours, method="left-to-right")[0]
-#
-#     regions = []
-#     regions_coor = []
-#
-#     image2 = image.copy()
-#
-#     for contour in word_contours:
-#         x, y, w, h = cv2.boundingRect(contour)
-#         regions_coor.append((x, y, w, h))
-#         cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#         regions.append(image[y:y + h, x:x + w])
-#
-#     if show_result:
-#         random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-#         cv2.imshow(random_string, image2)
-#         # cv2.imshow("Words detected", image2)
-#
-#     return regions, regions_coor
-
-
-# def __extract_lines(image, ksize=(8, 2)):
-#     preprocessed_image = 255 - preprocess_image(image, ksize, blocksize=251)
-#
-#     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
-#     dilated = cv2.dilate(preprocessed_image, kernel, iterations=2)
-#
-#     contours = find_contours(dilated)
-#     line_contours = filter_contours(contours, filter_object="lines")
-#     line_contours = sort_contours(line_contours, method="top-to-bottom")[0]
-#
-#     lines = []
-#
-#     for contour in line_contours:
-#         x, y, w, h = cv2.boundingRect(contour)
-#
-#         mask = np.zeros_like(preprocessed_image)
-#         cv2.drawContours(mask, [contour], -1, (255, 255, 255), -1)
-#         out = np.zeros_like(preprocessed_image)  # Extract out the object and place into output image
-#         out[mask == 255] = preprocessed_image[mask == 255]
-#
-#         lines.append(out[y:y + h, x:x + w])
-#
-#     return lines
-
-
-# def extract_words(image, ksize=(2, 2), show_result=False):
-#     lines_orig = detect_lines(image)[0]
-#     lines = __extract_lines(image)
-#
-#     words = []
-#
-#     for i, line in enumerate(lines):
-#
-#         dilated = cv2.dilate(line, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=1)
-#
-#         contours = find_contours(dilated)
-#         word_contours = filter_contours(contours, filter_object="words")
-#         word_contours = sort_contours(word_contours, method="left-to-right")[0]
-#
-#         linecpy = lines_orig[i].copy()
-#         for contour in word_contours:
-#             x, y, w, h = cv2.boundingRect(contour)
-#
-#             cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#
-#             words.append(lines_orig[i][y:y + h, x:x + w])
-#
-#         if show_result:
-#             # for i, line in enumerate(lines):
-#             #     cv2.imshow("Line " + str(i), line)
-#             #     cv2.imshow("Line " + str(i) + " orig", lines_orig[i])
-#             random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-#             cv2.imshow(random_string, linecpy)
-#
-#     return words
 
 
 def sort_contours(cnts, method="left-to-right"):

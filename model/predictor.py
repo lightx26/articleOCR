@@ -12,7 +12,7 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
     # Resize image for better detection
     resized_image = imgp.resize_image(image, new_width=1200)
 
-    pages = []
+    global pages
     if page == 'double':
         pages = extractor.separate_pages(resized_image, ksize=line_ksize)
         # cv2.imshow("Double pages: first page", pages[0])
@@ -28,9 +28,9 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
     config['device'] = 'cpu'
     detector = Predictor(config)
 
-    for page in pages:
+    result = ""
 
-        result = ""
+    for page in pages:
 
         if mode == 'line':
             lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)[0]
@@ -61,8 +61,8 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
         else:
             raise ValueError("This mode isn't supported. Choose 'line', 'word' or 'line-word'.")
 
-        if save_result[0]:
-            with open(save_result[1], 'a', encoding='utf-8') as file:
-                file.write(result)
+    if save_result[0] and save_result[1] is not None:
+        with open(save_result[1], 'a', encoding='utf-8') as file:
+            file.write(result)
 
     return result

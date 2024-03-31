@@ -1,12 +1,16 @@
 from model import predictor
+import os
 import cv2
 
 if __name__ == "__main__":
-    image_path = "data/test/test1.jpg"
-    output_path = "data/output/output_" + image_path.split("/")[-1] + ".txt"
+    image_path = os.path.join("data", "test", "2.jpg")
+    output_path = os.path.join("data", "output", "output_" + os.path.basename(image_path) + ".txt")
 
     image = cv2.imread(image_path)
-    predictor.predict(image, mode='word', page='double', save_result=(True, output_path))
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if image is None:
+        print("Failed to load image.")
+    else:
+        # mode: line or word
+        # page: single or double
+        predictor.predict(image, mode='line', page='single', save_result=(True, output_path))
