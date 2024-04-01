@@ -72,14 +72,14 @@ def extract_lines(image, ksize=(8, 2)):
     return lines
 
 
-def detect_words(image, ksize=(2, 2), show_result=False):
+def detect_words(image, ksize=(3, 2), show_result=False):
     '''
     Detects words in an image using the extracted lines
     :param image:
     :param ksize:
     :return: A list of images contains words (cut from original image)
     '''
-    lines_orig = detect_lines(image)[0]
+    lines_orig = detect_lines(image, show_result=True)[0]
     lines = extract_lines(image)
 
     words = []

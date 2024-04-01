@@ -8,9 +8,9 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 
 
-def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='double', save_result=(False, None)):
+def predict(image, line_ksize=(10, 2), word_ksize=(3, 2), mode='word', page='double', save_result=(False, None)):
     # Resize image for better detection
-    resized_image = imgp.resize_image(image, new_width=1200)
+    resized_image = imgp.resize_image(image, new_width=2000)
 
     global pages
     if page == 'double':
@@ -18,6 +18,7 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
         # cv2.imshow("Double pages: first page", pages[0])
         # cv2.imshow("Double pages: second page", pages[1])
     elif page == 'single':
+        resized_image = imgp.resize_image(resized_image, new_width=1000)
         pages = [resized_image]
         # cv2.imshow("Single page", pages[0])
 
@@ -53,7 +54,7 @@ def predict(image, line_ksize=(10, 2), word_ksize=(2, 2), mode='word', page='dou
 
         elif mode == 'word':
             # lines = imgp.detect_lines(page, ksize=line_ksize, show_result=False)[0]
-            words = extractor.detect_words(page, ksize=word_ksize, show_result=False)[0]
+            words = extractor.detect_words(page, ksize=word_ksize, show_result=True)[0]
             for word in words:
                 word_img = Image.fromarray(word)
                 s = detector.predict(word_img)

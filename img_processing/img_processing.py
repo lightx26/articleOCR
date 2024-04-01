@@ -22,7 +22,7 @@ def global_thresholding(image, ksize):
 
 def adaptive_thresholding(image, blocksize=251):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    blurred = cv2.GaussianBlur(gray_image, (9, 9), 0)
 
     thresh_image = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, 2)
 
