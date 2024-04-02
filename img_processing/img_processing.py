@@ -27,7 +27,7 @@ def is_previous_page_text(image):
     preprocessed = global_thresholding(image)
     # random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     # cv2.imshow(random_name, preprocessed)
-    if cv2.countNonZero(preprocessed) / preprocessed.size < 0.02:
+    if cv2.countNonZero(preprocessed) / preprocessed.size > 0.98:
         return True
     return False
 
