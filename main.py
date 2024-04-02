@@ -3,7 +3,7 @@ import os
 import cv2
 
 if __name__ == "__main__":
-    image_path = os.path.join("data", "test", "test1.jpg")
+    image_path = os.path.join("data", "test", "test4.jpg")
     output_path = os.path.join("data", "output", "output_" + os.path.basename(image_path) + ".txt")
 
     image = cv2.imread(image_path)

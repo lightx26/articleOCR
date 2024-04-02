@@ -79,7 +79,7 @@ def detect_words(image, ksize=(3, 2), show_result=False):
     :param ksize:
     :return: A list of images contains words (cut from original image)
     '''
-    lines_orig = detect_lines(image, show_result=True)[0]
+    lines_orig = detect_lines(image, show_result=show_result)[0]
     lines = extract_lines(image)
 
     words = []
@@ -100,6 +100,9 @@ def detect_words(image, ksize=(3, 2), show_result=False):
 
             cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
+            if imgp.is_previous_page_text(lines_orig[i][y:y + h, x:x + w]):
+                continue
+
             words.append(lines_orig[i][y:y + h, x:x + w])
             words_coor.append((x, y, w, h))
 
@@ -113,15 +116,25 @@ def detect_words(image, ksize=(3, 2), show_result=False):
     return words, words_coor
 
 
-def separate_pages(image, ksize):
-    line_coor = pd.DataFrame(detect_lines(image, ksize=ksize, show_result=False)[1])
+# def separate_pages(image, ksize):
+#     line_coor = pd.DataFrame(detect_lines(image, ksize=ksize, show_result=False)[1])
+#
+#     threshold = line_coor.iloc[:, 0].mean()
+#
+#     page_1 = line_coor[line_coor.iloc[:, 0] < threshold].iloc[:, [0, 2]].sum(axis=1).mean()
+#     page_2 = line_coor[line_coor.iloc[:, 0] > threshold].iloc[:, 0].mean()
+#
+#     x_line = (page_1 + page_2) // 2
+#     #
+#     # Separate pages based on the x-coordinate of the center of the bounding box
+#     return [image[:, :int(x_line)], image[:, int(x_line):]]
 
-    threshold = line_coor.iloc[:, 0].mean()
+def separate_pages(image):
+    '''
+    Separates double pages into two single pages
+    :param image: original image
+    :return: A list of two images, each contains one page
+    '''
+    height, width = image.shape[:2]
 
-    page_1 = line_coor[line_coor.iloc[:, 0] < threshold].iloc[:, [0, 2]].sum(axis=1).mean()
-    page_2 = line_coor[line_coor.iloc[:, 0] > threshold].iloc[:, 0].mean()
-
-    x_line = (page_1 + page_2) // 2
-    #
-    # Separate pages based on the x-coordinate of the center of the bounding box
-    return [image[:, :int(x_line)], image[:, int(x_line):]]
+    return [image[:, :width // 2], image[:, width // 2:]]

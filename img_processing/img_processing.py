@@ -1,3 +1,6 @@
+import random
+import string
+
 import cv2
 import numpy as np
 
@@ -13,11 +16,21 @@ def resize_image(image, scale_percent=None, new_width=1000):
     return cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
 
-def global_thresholding(image, ksize):
+def global_thresholding(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, thresh_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_OTSU)
+    _, thresh_image = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
 
     return thresh_image
+
+
+def is_previous_page_text(image):
+    preprocessed = global_thresholding(image)
+    # random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    # cv2.imshow(random_name, preprocessed)
+    if cv2.countNonZero(preprocessed) / preprocessed.size < 0.02:
+        return True
+    return False
+
 
 
 def adaptive_thresholding(image, blocksize=251):
@@ -37,10 +50,11 @@ def find_contours(thresh_image):
 def filter_contours(contours, filter_object):
     filtered_contours = []
 
-    mean_height = np.mean([cv2.boundingRect(cnt)[3] for cnt in contours if 20 < cv2.boundingRect(cnt)[3] < 60])
+    # full_line = [cnt for cnt in contours if 20000 < cv2.contourArea(cnt) < 30000 and cv2.boundingRect(cnt)[2] > 600]
 
     if filter_object == "lines":
         # mean_width = np.mean([cv2.boundingRect(cnt)[2] for cnt in contours])
+        # print(cv2.contourArea(contours[0]))
 
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
@@ -48,7 +62,18 @@ def filter_contours(contours, filter_object):
 
             # Filter based on aspect ratio, area, and other desired criteria
             # if (h > 30 and h < 150):
-            if mean_height * 0.5 < h < mean_height * 1.5:
+            # if mean_height * 0.5 < h < mean_height * 1.5:
+            if 20 < h < 80:
+                filtered_contours.append(cnt)
+
+    elif filter_object == "full-line":
+
+        # mean_height = np.mean([cv2.boundingRect(cnt)[3] for cnt in contours if 20 < cv2.boundingRect(cnt)[3] < 100])
+
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            # if mean_height * 0.75 < h < mean_height * 1.5 and w < 100:
+            if 20 < h < 80 and w > 600:
                 filtered_contours.append(cnt)
 
     elif filter_object == "words":
