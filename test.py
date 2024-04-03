@@ -11,29 +11,36 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 import cv2
 
-image_path = 'data/test/test4_2.jpg'
+image_path = 'data/test/test4_1.jpg'
 output_folder = 'data/output'
 image = cv2.imread(image_path)
 
 image = imgp.resize_image(image, new_width=1000)
 
-preprocessed = imgp.adaptive_thresholding(image,  blocksize=201)
-height, width = preprocessed.shape
-cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
-cv2.imshow("Preprocessed image 2", preprocessed[height//2:, :])
+line_rec = extractor.detect_lines(image, (8, 2), show_result=True)
+
+for line in line_rec[1]:
+    print(line)
+
+# words = extractor.detect_words(image, (4, 2), show_result=True)[0]
+
+# preprocessed = imgp.adaptive_thresholding(image,  blocksize=201)
+# height, width = preprocessed.shape
+# cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
+# cv2.imshow("Preprocessed image 2", preprocessed[height//2:, :])
 
 # kernel = cv2.getStructuringElement(cv2.MORPH_DILATE, (5, 15))
 
 
-kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (16, 2))
-dilated = cv2.dilate(255 - preprocessed, kernel, iterations=2)
-cv2.imshow("Dilated image 1", dilated[:height//2, :])
-cv2.imshow("Dilated image 2", dilated[height//2:, :])
+# kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (16, 2))
+# dilated = cv2.dilate(255 - preprocessed, kernel, iterations=2)
+# cv2.imshow("Dilated image 1", dilated[:height//2, :])
+# cv2.imshow("Dilated image 2", dilated[height//2:, :])
 
-contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 # hull = cv2.convexHull(contours[15:20])
 #
-image2 = image.copy()
+# image2 = image.copy()
 # cv2.drawContours(image2, contours[15:20], -1, (0, 0, 255), 1)
 # cv2.drawContours(image2, [hull], -1, (0, 255, 0), 1)
 # for contour in hull:
@@ -46,27 +53,27 @@ image2 = image.copy()
 #     x, y, w, h = cv2.boundingRect(contour)
 #     cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 0, 255), 1)
 
-full_line = [contour for contour in contours if 15000 < cv2.contourArea(contour) < 30000 and cv2.boundingRect(contour)[2] > 600]
-
-full_line_area = [cv2.contourArea(contour) for contour in full_line]
-
-for contour in full_line:
-    print(cv2.contourArea(contour))
-    x, y, w, h = cv2.boundingRect(contour)
-    cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
-
-print("Mean height: ", np.mean([cv2.boundingRect(contour)[3] for contour in full_line]))
-print("Median height: ", np.median([cv2.boundingRect(contour)[3] for contour in full_line]))
-print("Min height: ", np.min([cv2.boundingRect(contour)[3] for contour in full_line]))
-print("Max height: ", np.max([cv2.boundingRect(contour)[3] for contour in full_line]))
-print("Mean: ", np.mean(full_line_area))
-print("Median", np.median(full_line_area))
-
-print("Max: ", np.max([cv2.contourArea(contour) for contour in contours]))
-
-
-cv2.imshow("Lines detected 1", image2[:height//2, :])
-cv2.imshow("Lines detected 2", image2[height//2:, :])
+# full_line = [contour for contour in contours if 15000 < cv2.contourArea(contour) < 30000 and cv2.boundingRect(contour)[2] > 600]
+#
+# full_line_area = [cv2.contourArea(contour) for contour in full_line]
+#
+# for contour in full_line:
+#     print(cv2.contourArea(contour))
+#     x, y, w, h = cv2.boundingRect(contour)
+#     cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
+#
+# print("Mean height: ", np.mean([cv2.boundingRect(contour)[3] for contour in full_line]))
+# print("Median height: ", np.median([cv2.boundingRect(contour)[3] for contour in full_line]))
+# print("Min height: ", np.min([cv2.boundingRect(contour)[3] for contour in full_line]))
+# print("Max height: ", np.max([cv2.boundingRect(contour)[3] for contour in full_line]))
+# print("Mean: ", np.mean(full_line_area))
+# print("Median", np.median(full_line_area))
+#
+# print("Max: ", np.max([cv2.contourArea(contour) for contour in contours]))
+#
+#
+# cv2.imshow("Lines detected 1", image2[:height//2, :])
+# cv2.imshow("Lines detected 2", image2[height//2:, :])
 
 
 # lines_rec = extractor.detect_lines(image, ksize=(10, 2), show_result=True)[0]

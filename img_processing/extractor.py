@@ -23,7 +23,8 @@ def detect_lines(image, ksize=(8, 2), show_result=False):
 
     contours = imgp.find_contours(dilated)
     line_contours = imgp.filter_contours(contours, filter_object="lines")
-    line_contours = imgp.sort_contours(line_contours, method="top-to-bottom")[0]
+    # line_contours = imgp.sort_contours(line_contours, method="top-to-bottom")[0]
+    line_contours = imgp.cluster_by_line(imgp.sort_contours(line_contours, method="top-to-bottom")[0])
 
     lines = []
     lines_coor = []
@@ -55,7 +56,8 @@ def extract_lines(image, ksize=(8, 2)):
 
     line_contours = imgp.find_contours(dilated_image)
     line_contours = imgp.filter_contours(line_contours, filter_object="lines")
-    line_contours = imgp.sort_contours(line_contours, method="top-to-bottom")[0]
+    # line_contours = imgp.sort_contours(line_contours, method="top-to-bottom")[0]
+    line_contours = imgp.cluster_by_line(imgp.sort_contours(line_contours, method="top-to-bottom")[0])
 
     lines = []
 
@@ -98,10 +100,10 @@ def detect_words(image, ksize=(3, 2), show_result=False):
         for contour in word_contours:
             x, y, w, h = cv2.boundingRect(contour)
 
-            cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
-
-            if imgp.is_previous_page_text(lines_orig[i][y:y + h, x:x + w]):
+            if imgp.is_none_text(lines_orig[i][y:y + h, x:x + w]):
                 continue
+
+            cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
             words.append(lines_orig[i][y:y + h, x:x + w])
             words_coor.append((x, y, w, h))
