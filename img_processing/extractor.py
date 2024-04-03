@@ -16,7 +16,7 @@ def detect_lines(image, ksize=(12, 2), show_result=False):
     :param show_result:
     :return: A list of images contains text line (cut from original image) and a list of coordinates of the rectangle bounding each line
     '''
-    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=251)
+    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=15)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
     dilated = cv2.dilate(255 - preprocessed_image, kernel, iterations=2)
@@ -50,7 +50,9 @@ def extract_lines(image, ksize=(12, 2)):
     :param ksize: kernel size for dilation (x: horizontal, y: vertical)
     :return: A list of images (black background) containing the extracted lines (white text)
     '''
-    preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=251)
+
+    hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blocksize=51, c=2)
+    preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=15)
 
     dilated_image = cv2.dilate(preprocessed_image, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
 
@@ -67,7 +69,7 @@ def extract_lines(image, ksize=(12, 2)):
         mask = np.zeros_like(preprocessed_image)
         cv2.drawContours(mask, [contour], -1, (255, 255, 255), -1)
         out = np.zeros_like(preprocessed_image)  # Extract out the object and place into output image
-        out[mask == 255] = preprocessed_image[mask == 255]
+        out[mask == 255] = hl_text_preprocessed[mask == 255]
 
         lines.append(out[y:y + h, x:x + w])
 
@@ -81,7 +83,7 @@ def detect_words(image, ksize=(4, 2), show_result=False):
     :param ksize:
     :return: A list of images contains words (cut from original image)
     '''
-    lines_orig = detect_lines(image, show_result=show_result)[0]
+    lines_orig = detect_lines(image, show_result=False)[0]
     lines = extract_lines(image)
 
     words = []
@@ -89,7 +91,10 @@ def detect_words(image, ksize=(4, 2), show_result=False):
 
     for i, line in enumerate(lines):
 
-        dilated = cv2.dilate(line, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=1)
+        dilated = cv2.dilate(line, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=1)
+
+        # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+        # cv2.imshow(random_name, dilated)
 
         contours = imgp.find_contours(dilated)
         word_contours = imgp.filter_contours(contours, filter_object="words")

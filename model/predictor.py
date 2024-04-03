@@ -8,7 +8,7 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 
 
-def predict(image, line_ksize=(12, 2), word_ksize=(4, 2), mode='word', page='double', save_result=(False, None)):
+def predict(image, line_ksize=(18, 6), word_ksize=(8, 10), mode='word', page='double', save_result=(False, None)):
     # Resize image for better detection
     resized_image = imgp.resize_image(image, new_width=2000)
 

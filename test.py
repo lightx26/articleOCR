@@ -11,31 +11,42 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 import cv2
 
-image_path = 'data/test/test3_2.jpg'
+image_path = 'data/test/44_1.jpg'
 output_folder = 'data/output'
 image = cv2.imread(image_path)
 
 image = imgp.resize_image(image, new_width=1000)
 
-line_rec = extractor.detect_lines(image, (12, 2), show_result=True)
+# line_rec = extractor.detect_lines(image, (18, 6), show_result=True)[0]
+# line_prp = extractor.extract_lines(image, (18, 6))
+# #
+# for i, line in enumerate(line_prp):
+#     random_name1 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+#     random_name2 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+#     cv2.imshow(random_name1, line)
+#     cv2.imshow(random_name2, line_rec[i])
 
-for line in line_rec[1]:
-    print(line)
+# words = extractor.detect_words(image, (10, 6), show_result=False)[0]
+
+# for line in line_rec[1]:
+#     print(line)
 
 # words = extractor.detect_words(image, (4, 2), show_result=True)[0]
 
-# preprocessed = imgp.adaptive_thresholding(image,  blocksize=201)
-# height, width = preprocessed.shape
-# cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
-# cv2.imshow("Preprocessed image 2", preprocessed[height//2:, :])
+preprocessed = imgp.adaptive_thresholding(image,  blocksize=51, c=2)
+height, width = preprocessed.shape
+cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
+cv2.imshow("Preprocessed image 2", preprocessed[height//2:, :])
+cv2.imshow("Preprocessed image", preprocessed)
 
 # kernel = cv2.getStructuringElement(cv2.MORPH_DILATE, (5, 15))
 
 
-# kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (16, 2))
+# kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (12, 2))
 # dilated = cv2.dilate(255 - preprocessed, kernel, iterations=2)
 # cv2.imshow("Dilated image 1", dilated[:height//2, :])
 # cv2.imshow("Dilated image 2", dilated[height//2:, :])
+# cv2.imshow("Dilated image", dilated)
 
 # contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 # hull = cv2.convexHull(contours[15:20])

@@ -32,11 +32,11 @@ def is_none_text(image):
     return False
 
 
-def adaptive_thresholding(image, blocksize=251):
+def adaptive_thresholding(image, blocksize=15, c=8):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray_image, (9, 9), 0)
+    blurred = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
-    thresh_image = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, 2)
+    thresh_image = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, 8)
 
     return thresh_image
 
@@ -62,7 +62,8 @@ def filter_contours(contours, filter_object):
             # Filter based on aspect ratio, area, and other desired criteria
             # if (h > 30 and h < 150):
             # if mean_height * 0.5 < h < mean_height * 1.5:
-            if 20 < h < 80 or (h >= 80 and 0.6 < w / h < 15):
+            if 20 < h < 80 or (80 <= h <= 400 and 0.6 < w / h < 15):
+            # if True:
                 filtered_contours.append(cnt)
 
     elif filter_object == "full-line":
