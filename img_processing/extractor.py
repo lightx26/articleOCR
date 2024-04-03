@@ -8,7 +8,7 @@ from img_processing import img_processing as imgp
 import cv2
 
 
-def detect_lines(image, ksize=(8, 2), show_result=False):
+def detect_lines(image, ksize=(12, 2), show_result=False):
     '''
     Detects lines in an image, work effectively with straight text lines
     :param image:
@@ -43,7 +43,7 @@ def detect_lines(image, ksize=(8, 2), show_result=False):
     return lines, lines_coor
 
 
-def extract_lines(image, ksize=(8, 2)):
+def extract_lines(image, ksize=(12, 2)):
     '''
     Extracts lines from an image, work effectively with curved text lines
     :param image: original image
@@ -74,7 +74,7 @@ def extract_lines(image, ksize=(8, 2)):
     return lines
 
 
-def detect_words(image, ksize=(3, 2), show_result=False):
+def detect_words(image, ksize=(4, 2), show_result=False):
     '''
     Detects words in an image using the extracted lines
     :param image:

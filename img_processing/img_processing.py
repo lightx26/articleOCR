@@ -62,7 +62,7 @@ def filter_contours(contours, filter_object):
             # Filter based on aspect ratio, area, and other desired criteria
             # if (h > 30 and h < 150):
             # if mean_height * 0.5 < h < mean_height * 1.5:
-            if 20 < h < 80:
+            if 20 < h < 80 or (h >= 80 and 0.6 < w / h < 15):
                 filtered_contours.append(cnt)
 
     elif filter_object == "full-line":

@@ -11,13 +11,13 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 import cv2
 
-image_path = 'data/test/test4_1.jpg'
+image_path = 'data/test/test3_2.jpg'
 output_folder = 'data/output'
 image = cv2.imread(image_path)
 
 image = imgp.resize_image(image, new_width=1000)
 
-line_rec = extractor.detect_lines(image, (8, 2), show_result=True)
+line_rec = extractor.detect_lines(image, (12, 2), show_result=True)
 
 for line in line_rec[1]:
     print(line)
