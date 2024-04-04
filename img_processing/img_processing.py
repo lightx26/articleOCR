@@ -41,7 +41,6 @@ def is_char_ratio(char_shape, line_shape):
     return False
 
 
-
 def adaptive_thresholding(image, blur=True, blocksize=15, c=8):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -92,7 +91,7 @@ def filter_contours(contours, filter_object):
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             # if mean_height * 0.75 < h < mean_height * 1.5 and w < 100:
-            if 10 < h < 60:
+            if 10 < h < 60 or (60 <= h <= 400 and 0.1 < w / h < 5):
                 filtered_contours.append(cnt)
 
     return filtered_contours
@@ -137,9 +136,9 @@ def cluster_by_line(contours, threshold=20):
                 continue
 
         cluster = sort_contours(cluster, method="left-to-right")[0]
-        clusters.extend(cluster)
+        clusters.append(cluster)
         cluster = [cnt]
     cluster = sort_contours(cluster, method="left-to-right")[0]
-    clusters.extend(cluster)
+    clusters.append(cluster)
 
     return clusters

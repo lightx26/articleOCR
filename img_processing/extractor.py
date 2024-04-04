@@ -31,12 +31,16 @@ def detect_lines(image, ksize=(12, 4), show_result=False):
 
     image2 = image.copy()
 
-    for contour in line_contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        lines_coor.append((x, y, w, h))
-        cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
-        lines.append(image[y:y + h, x:x + w])
-
+    for line in line_contours:
+        sub_line = []
+        sub_line_coor = []
+        for contour in line:
+            x, y, w, h = cv2.boundingRect(contour)
+            sub_line_coor.append((x, y, w, h))
+            cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            sub_line.append(image[y:y + h, x:x + w])
+        lines.append(sub_line)
+        lines_coor.append(sub_line_coor)
     if show_result:
         cv2.imshow("Lines detected", image2)
 
@@ -63,16 +67,18 @@ def extract_lines_mask(image, ksize=(12, 4)):
 
     lines = []
 
-    for contour in line_contours:
-        x, y, w, h = cv2.boundingRect(contour)
+    for line in line_contours:
+        sub_line = []
+        for contour in line:
+            x, y, w, h = cv2.boundingRect(contour)
 
-        mask = np.zeros_like(preprocessed_image)
-        cv2.drawContours(mask, [contour], -1, (255, 255, 255), -1)
-        out = np.zeros_like(preprocessed_image)  # Extract out the object and place into output image
-        out[mask == 255] = hl_text_preprocessed[mask == 255]
+            mask = np.zeros_like(preprocessed_image)
+            cv2.drawContours(mask, [contour], -1, (255, 255, 255), -1)
+            out = np.zeros_like(preprocessed_image)  # Extract out the object and place into output image
+            out[mask == 255] = hl_text_preprocessed[mask == 255]
 
-        lines.append(out[y:y + h, x:x + w])
-
+            sub_line.append(out[y:y + h, x:x + w])
+        lines.append(sub_line)
     return lines
 
 
@@ -96,66 +102,68 @@ def extract_lines_image(image, ksize=(12, 4)):
 
     lines = []
 
-    for contour in line_contours:
-        x, y, w, h = cv2.boundingRect(contour)
+    for line in line_contours:
+        for contour in line:
+            x, y, w, h = cv2.boundingRect(contour)
 
-        hull = cv2.convexHull(contour)
+            hull = cv2.convexHull(contour)
 
-        mask = np.full_like(image, 255)
-        cv2.drawContours(mask, [hull], -1, (0, 0, 0), -1)
-        out = np.full_like(image, 255)  # Extract out the object and place into output image
-        out[mask == 0] = image[mask == 0]
+            mask = np.full_like(image, 255)
+            cv2.drawContours(mask, [hull], -1, (0, 0, 0), -1)
+            out = np.full_like(image, 255)  # Extract out the object and place into output image
+            out[mask == 0] = image[mask == 0]
 
-        lines.append(out[y:y + h, x:x + w])
+            lines.append(out[y:y + h, x:x + w])
 
     return lines
 
 
-def detect_words(image, ksize=(8, 10), show_result=False):
-    '''
-    Detects words in an image using the extracted lines
-    :param image:
-    :param ksize:
-    :return: A list of images contains words (cut from original image)
-    '''
-    lines_orig = detect_lines(image, show_result=False)[0]
-    lines = extract_lines_mask(image)
-
-    words = []
-    words_coor = []
-
-    for i, line in enumerate(lines):
-
-        dilated = cv2.dilate(line, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=1)
-
-        # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-        # cv2.imshow(random_name, dilated)
-
-        contours = imgp.find_contours(dilated)
-        word_contours = imgp.filter_contours(contours, filter_object="words")
-        word_contours = imgp.sort_contours(word_contours, method="left-to-right")[0]
-
-        linecpy = lines_orig[i].copy()
-
-        for contour in word_contours:
-            x, y, w, h = cv2.boundingRect(contour)
-
-            if imgp.is_none_text(lines_orig[i][y:y + h, x:x + w]):
-                continue
-
-            cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
-
-            words.append(lines_orig[i][y:y + h, x:x + w])
-            words_coor.append((x, y, w, h))
-
-        if show_result:
-            # for i, line in enumerate(lines):
-            #     cv2.imshow("Line " + str(i), line)
-            #     cv2.imshow("Line " + str(i) + " orig", lines_orig[i])
-            random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-            cv2.imshow(random_string, linecpy)
-
-    return words, words_coor
+# def detect_words(image, ksize=(8, 10), show_result=False):
+#     '''
+#     Detects words in an image using the extracted lines
+#     :param image:
+#     :param ksize:
+#     :return: A list of images contains words (cut from original image)
+#     '''
+#     lines_orig = detect_lines(image, show_result=False)[0]
+#     lines = extract_lines_mask(image)
+#
+#     words = []
+#     words_coor = []
+#
+#     for i, line in enumerate(lines):
+#         for j, sub_line in enumerate(line):
+#
+#             dilated = cv2.dilate(sub_line, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=1)
+#
+#             # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+#             # cv2.imshow(random_name, dilated)
+#
+#             contours = imgp.find_contours(dilated)
+#             word_contours = imgp.filter_contours(contours, filter_object="words")
+#             word_contours = imgp.sort_contours(word_contours, method="left-to-right")[0]
+#
+#             linecpy = lines_orig[i][j].copy()
+#
+#             for contour in word_contours:
+#                 x, y, w, h = cv2.boundingRect(contour)
+#
+#                 if imgp.is_none_text(lines_orig[i][j][y:y + h, x:x + w]):
+#                     continue
+#
+#                 cv2.rectangle(linecpy, (x, y), (x + w, y + h), (0, 255, 0), 1)
+#
+#                 words.append(lines_orig[i][j][y:y + h, x:x + w])
+#                 words_coor.append((x, y, w, h))
+#
+#             if show_result:
+#                 # for i, line in enumerate(lines):
+#                 #     cv2.imshow("Line " + str(i), line)
+#                 #     cv2.imshow("Line " + str(i) + " orig", lines_orig[i])
+#                 random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+#                 cv2.imshow(random_string, linecpy)
+#
+#     return words, words_coor
 
 
 def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
