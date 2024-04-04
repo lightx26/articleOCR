@@ -11,7 +11,7 @@ if __name__ == "__main__":
     if image is None:
         print("Failed to load image.")
     else:
-        # mode: line or word
+        # mode: line, line-word or word
         # page: single or double
         predictor.predict(image, mode='word', page='double', save_result=(True, output_path))
 

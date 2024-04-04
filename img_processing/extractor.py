@@ -8,7 +8,7 @@ from img_processing import img_processing as imgp
 import cv2
 
 
-def detect_lines(image, ksize=(12, 2), show_result=False):
+def detect_lines(image, ksize=(12, 4), show_result=False):
     '''
     Detects lines in an image, work effectively with straight text lines
     :param image:
@@ -43,7 +43,7 @@ def detect_lines(image, ksize=(12, 2), show_result=False):
     return lines, lines_coor
 
 
-def extract_lines(image, ksize=(12, 2)):
+def extract_lines_mask(image, ksize=(12, 4)):
     '''
     Extracts lines from an image, work effectively with curved text lines
     :param image: original image
@@ -51,7 +51,7 @@ def extract_lines(image, ksize=(12, 2)):
     :return: A list of images (black background) containing the extracted lines (white text)
     '''
 
-    hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blocksize=51, c=2)
+    hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4)
     preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=15)
 
     dilated_image = cv2.dilate(preprocessed_image, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
@@ -76,7 +76,42 @@ def extract_lines(image, ksize=(12, 2)):
     return lines
 
 
-def detect_words(image, ksize=(4, 2), show_result=False):
+def extract_lines_image(image, ksize=(12, 4)):
+    '''
+    Extracts lines from an image, work effectively with curved text lines
+    :param image: original image
+    :param ksize: kernel size for dilation (x: horizontal, y: vertical)
+    :return: A list of images containing the convexhull around original text
+    '''
+
+    # hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4)
+    preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=15)
+
+    dilated_image = cv2.dilate(preprocessed_image, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
+
+    line_contours = imgp.find_contours(dilated_image)
+    line_contours = imgp.filter_contours(line_contours, filter_object="lines")
+    # line_contours = imgp.sort_contours(line_contours, method="top-to-bottom")[0]
+    line_contours = imgp.cluster_by_line(imgp.sort_contours(line_contours, method="top-to-bottom")[0])
+
+    lines = []
+
+    for contour in line_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+
+        hull = cv2.convexHull(contour)
+
+        mask = np.full_like(image, 255)
+        cv2.drawContours(mask, [hull], -1, (0, 0, 0), -1)
+        out = np.full_like(image, 255)  # Extract out the object and place into output image
+        out[mask == 0] = image[mask == 0]
+
+        lines.append(out[y:y + h, x:x + w])
+
+    return lines
+
+
+def detect_words(image, ksize=(8, 10), show_result=False):
     '''
     Detects words in an image using the extracted lines
     :param image:
@@ -84,7 +119,7 @@ def detect_words(image, ksize=(4, 2), show_result=False):
     :return: A list of images contains words (cut from original image)
     '''
     lines_orig = detect_lines(image, show_result=False)[0]
-    lines = extract_lines(image)
+    lines = extract_lines_mask(image)
 
     words = []
     words_coor = []
@@ -122,6 +157,44 @@ def detect_words(image, ksize=(4, 2), show_result=False):
 
     return words, words_coor
 
+
+def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
+    '''
+    Detects words in a line
+    :param line: original line
+    :param mask: mask of the line
+    :param ksize: kernel size for dilation (x: horizontal, y: vertical)
+    :param show_result:
+    :return: A list of images contains words (cut from original line)
+    '''
+    dilated = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=1)
+
+    contours = imgp.find_contours(dilated)
+    word_contours = imgp.filter_contours(contours, filter_object="words")
+    word_contours = imgp.sort_contours(word_contours, method="left-to-right")[0]
+
+    words = []
+    words_coor = []
+
+    for contour in word_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+
+        if imgp.is_none_text(line[y:y + h, x:x + w]):
+            continue
+
+        words.append(line[y:y + h, x:x + w])
+        words_coor.append((x, y, w, h))
+
+    if show_result:
+        line_copy = line.copy()
+        for contour in word_contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(line_copy, (x, y), (x + w, y + h), (0, 255, 0), 1)
+
+        random_string = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+        cv2.imshow(random_string, line_copy)
+
+    return words, words_coor
 
 # def separate_pages(image, ksize):
 #     line_coor = pd.DataFrame(detect_lines(image, ksize=ksize, show_result=False)[1])

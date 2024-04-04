@@ -14,11 +14,13 @@ def resize_image(image, scale_percent=None, new_width=1000):
     return cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
 
-def global_thresholding(image):
+def global_thresholding(image, OTSU=False):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, thresh_image = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
 
-    return thresh_image
+    if OTSU:
+        return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    return cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)[1]
 
 
 def is_none_text(image):
@@ -32,11 +34,13 @@ def is_none_text(image):
     return False
 
 
-def adaptive_thresholding(image, blocksize=15, c=8):
+def adaptive_thresholding(image, blur=True, blocksize=15, c=8):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
-    thresh_image = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, 8)
+    if blur:
+        gray_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+
+    thresh_image = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, c)
 
     return thresh_image
 
