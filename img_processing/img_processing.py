@@ -34,6 +34,14 @@ def is_none_text(image):
     return False
 
 
+def is_char_ratio(char_shape, line_shape):
+    if char_shape[0] / line_shape[0] > 0.4 or char_shape[1] > 25:
+        return True
+
+    return False
+
+
+
 def adaptive_thresholding(image, blur=True, blocksize=15, c=8):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 

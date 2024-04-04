@@ -2,6 +2,7 @@ import random
 import string
 
 import cv2
+import numpy as np
 from jdeskew.estimator import get_angle
 from jdeskew.utility import rotate
 from vietocr.tool.predictor import Predictor
@@ -9,6 +10,8 @@ from vietocr.tool.config import Cfg
 from PIL import Image
 
 from img_processing import img_processing as imgp, extractor
+
+noise_char = 'qwrtpsdfghjklzxcvbnmQWRTYPSDFGHJKLZXCVBNMeyuioEYUIO'
 
 
 def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='double', save_result=(False, None)):
@@ -47,10 +50,8 @@ def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='do
                 result += s + "\n"
 
         elif mode == 'line-word':
-            lines = extractor.extract_lines_mask(page, ksize=line_ksize)
-            # lines = extractor.extract_lines_image(page, ksize=line_ksize)
-            for line in lines:
-                # line = imgp.global_thresholding(line, True)
+            lines_mask = extractor.extract_lines_mask(page, ksize=line_ksize)
+            for line in lines_mask:
                 random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
                 cv2.imshow(random_name, 255 - line)
 
@@ -59,17 +60,28 @@ def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='do
                 result += s + "\n"
 
         elif mode == 'word':
-            lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)[0]
-            lines_mask = extractor.extract_lines_mask(page, ksize=line_ksize)
-            for i, line in enumerate(lines):
+            lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)
 
+            left_offset = np.median([line[0] for line in lines[1]])
+            right_offset = np.median([line[0] + line[2] for line in lines[1]])
+
+            lines_mask = extractor.extract_lines_mask(page, ksize=line_ksize)
+            for i, line in enumerate(lines[0]):
                 # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
                 # cv2.imshow(random_name, lines_mask[i])
+                if (lines[1][i][0] < left_offset - 100) or (lines[1][i][0] + lines[1][i][2] > right_offset + 100):
+                    continue
 
                 words = extractor.detect_words_in_line(line, lines_mask[i], ksize=word_ksize, show_result=False)[0]
+
                 for word in words:
                     word_img = Image.fromarray(word)
                     s = detector.predict(word_img)
+
+                    if len(s) == 1:
+                        if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
+                            s = '-'
+
                     result += s + " "
                 result += "\n"
 
