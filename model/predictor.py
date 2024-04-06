@@ -5,11 +5,12 @@ import cv2
 import numpy as np
 from jdeskew.estimator import get_angle
 from jdeskew.utility import rotate
-from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
+from vietocr.tool.predictor import Predictor
 from PIL import Image
 
 from img_processing import img_processing as imgp, extractor
+from model.utils import get_config
 
 
 def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='double', save_result=(False, None)):
@@ -30,8 +31,13 @@ def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='do
     else:
         raise ValueError("This page mode isn't supported. Choose 'single' or 'double'.")
 
-    config = Cfg.load_config_from_name('vgg_seq2seq')
+    # config = Cfg.load_config_from_name('vgg_seq2seq')
+    # config['device'] = 'cpu'
+    # detector = Predictor(config)
+
+    config = get_config.load_config_from_file("model\\config\\base.yml", "model\\config\\vgg-seq2seq.yml")
     config['device'] = 'cpu'
+    config['weights'] = 'model/config/vgg_seq2seq.pth'
     detector = Predictor(config)
 
     result = ""
@@ -60,15 +66,14 @@ def predict(image, line_ksize=(12, 3), word_ksize=(8, 10), mode='word', page='do
         elif mode == 'word':
             lines = extractor.detect_lines(page, ksize=line_ksize, show_result=False)
 
-            left_offset = np.median([line[0][0] for line in lines[1]])
-            right_offset = np.median([line[0][0] + line[0][2] for line in lines[1]])
+            left_offset = np.median([line[0][0] for line in lines[1] if line[0][2] > 500])
+            right_offset = np.median([line[-1][0] + line[-1][2] for line in lines[1] if line[-1][2] > 500])
 
             lines_mask = extractor.extract_lines_mask(page, ksize=line_ksize)
             for i, line in enumerate(lines[0]):
                 for j, sub_line in enumerate(line):
-                # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-                # cv2.imshow(random_name, lines_mask[i])
-                    if (lines[1][i][j][0] < left_offset - 100) or (lines[1][i][j][0] + lines[1][i][j][2] > right_offset + 100):
+                    if (lines[1][i][j][0] < left_offset - 100) or (
+                            lines[1][i][j][0] + lines[1][i][j][2] > right_offset + 100):
                         continue
 
                     words = extractor.detect_words_in_line(sub_line, lines_mask[i][j], ksize=word_ksize, show_result=False)[0]
