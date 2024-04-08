@@ -11,13 +11,13 @@ from PIL import Image
 from img_processing import img_processing as imgp, extractor
 import cv2
 
-image_path = 'data/test/test2_1.jpg'
+image_path = 'data/test/44_2.jpg'
 output_folder = 'data/output'
 image = cv2.imread(image_path)
 
 image = imgp.resize_image(image, new_width=1000)
 # preprocessed1 = imgp.global_thresholding(image, True)
-preprocessed = imgp.adaptive_thresholding(image,  blocksize=15)
+# preprocessed = imgp.adaptive_thresholding(image,  blocksize=15)
 # cv2.imwrite(os.path.join(output_folder, 'oriprp.jpg'), 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4))
 # height, width = preprocessed.shape
 # cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
@@ -33,8 +33,8 @@ preprocessed = imgp.adaptive_thresholding(image,  blocksize=15)
 # cv2.imshow("Dilated image 2", dilated[height//2:, :])
 # cv2.imshow("Dilated image", dilated)
 
-line_rec = extractor.detect_lines(image, (12, 3), show_result=False)[0]
-line_prp = extractor.extract_lines_mask(image, (12, 3))
+line_rec = extractor.detect_lines(image, (12, 3), show_result=True)[0]
+# line_prp = extractor.extract_lines_mask(image, (12, 3))
 # #
 # cv2.imwrite(os.path.join(output_folder, 'mline6.jpg'), line_rec[6][0])
 
@@ -45,7 +45,7 @@ line_prp = extractor.extract_lines_mask(image, (12, 3))
 #         cv2.imshow(random_name1, sub_line)
 #         cv2.imshow(random_name2, line_rec[i][j])
 
-words = extractor.detect_words_in_line(line_rec[6][0], line_prp[6][0], ksize=(6,6), show_result=True)[0]
+# words = extractor.detect_words_in_line(line_rec[6][0], line_prp[6][0], ksize=(6,6), show_result=True)[0]
 # for i, word in enumerate(words):
 #     random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 #     cv2.imwrite(random_name + ".jpg", word)

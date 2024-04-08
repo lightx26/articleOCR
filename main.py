@@ -1,13 +1,17 @@
 from model import predictor
 import os
 import cv2
+import yaml
 
 if __name__ == "__main__":
-    # image_path = os.path.join("data", "test", "test6.jpg")
-    image_path = os.path.join("D:\\QUANG\\Hoctap\\Python\\projects\\audio2", "Image", "test7.jpg")
-    # output_path = os.path.join("data", "output", "output_" + os.path.basename(image_path) + ".txt")
-    output_path = os.path.join("D:\\QUANG\\Hoctap\\Python\\projects\\audio2\\Text", os.path.basename(image_path) + ".txt")
 
+    with open("file.yaml", "r") as f:
+        config = yaml.load(f)
+
+    input_path = config['input_path']
+    output_path = config['output_path']
+
+    image_path = os.path.join(input_path, 'image.jpg')
     image = cv2.imread(image_path)
 
     if image is None:
