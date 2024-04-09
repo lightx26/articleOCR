@@ -1,7 +1,7 @@
 input_path: ./data/input
 output_path: ./data/output
-reader:
-  mode: word
-  page: double
-  line_ksize: [12, 3]
-  word_ksize: [8, 10]
+#reader:
+#  mode: word
+#  page: double
+#  line_ksize: [12, 3]
+#  word_ksize: [8, 10]

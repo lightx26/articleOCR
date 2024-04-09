@@ -1,21 +1,18 @@
 import random
 import string
 import numpy as np
-import pandas as pd
-
 from img_processing import img_processing as imgp
-
 import cv2
 
 
 def detect_lines(image, ksize=(12, 4), show_result=False):
-    '''
+    """
     Detects lines in an image, work effectively with straight text lines
     :param image:
     :param ksize:
     :param show_result:
     :return: A list of images contains text line (cut from original image) and a list of coordinates of the rectangle bounding each line
-    '''
+    """
     preprocessed_image = imgp.adaptive_thresholding(image, blocksize=15)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
@@ -48,12 +45,12 @@ def detect_lines(image, ksize=(12, 4), show_result=False):
 
 
 def extract_lines_mask(image, ksize=(12, 4)):
-    '''
+    """
     Extracts lines from an image, work effectively with curved text lines
     :param image: original image
     :param ksize: kernel size for dilation (x: horizontal, y: vertical)
     :return: A list of images (black background) containing the extracted lines (white text)
-    '''
+    """
 
     hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4)
     preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=15)
@@ -204,25 +201,13 @@ def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
 
     return words, words_coor
 
-# def separate_pages(image, ksize):
-#     line_coor = pd.DataFrame(detect_lines(image, ksize=ksize, show_result=False)[1])
-#
-#     threshold = line_coor.iloc[:, 0].mean()
-#
-#     page_1 = line_coor[line_coor.iloc[:, 0] < threshold].iloc[:, [0, 2]].sum(axis=1).mean()
-#     page_2 = line_coor[line_coor.iloc[:, 0] > threshold].iloc[:, 0].mean()
-#
-#     x_line = (page_1 + page_2) // 2
-#     #
-#     # Separate pages based on the x-coordinate of the center of the bounding box
-#     return [image[:, :int(x_line)], image[:, int(x_line):]]
 
 def separate_pages(image):
-    '''
+    """
     Separates double pages into two single pages
     :param image: original image
     :return: A list of two images, each contains one page
-    '''
+    """
     height, width = image.shape[:2]
 
     return [image[:, :width // 2], image[:, width // 2:]]
