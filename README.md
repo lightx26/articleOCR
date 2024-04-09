@@ -6,7 +6,7 @@ This application is built on top of VietOCR (https://github.com/pbcquoc/vietocr)
 The main goal of this project is to extract text from images of articles and save it to an editable plain text file.
 
 ## Installation
-**Clone this project**:
+### Clone this project:
 ```angular2html
 git clone https://github.com/lightx26/articleOCR
 ```
