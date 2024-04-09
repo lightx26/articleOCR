@@ -4,3 +4,4 @@ vietocr~=0.3.13
 pillow~=10.2.0
 numpy~=1.26.4
 pandas~=2.2.1
+PyYAML~=6.0.1
