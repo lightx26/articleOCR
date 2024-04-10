@@ -186,8 +186,10 @@ def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
 
         if imgp.is_none_text(line[y:y + h, x:x + w]):
             continue
-
-        words.append(line[y:y + h, x:x + w])
+        if y > 6:
+            words.append(line[y - 6:y + h + 6, x:x + w])
+        else:
+            words.append(line[y:y + h + 6, x:x + w])
         words_coor.append((x, y, w, h))
 
     if show_result:

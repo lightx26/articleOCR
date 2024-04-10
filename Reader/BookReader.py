@@ -11,8 +11,8 @@ class BookReader:
     def __init__(self, config=None):
         if config is None:
             config = {
-                'mode': 'word',
-                'page': 'double',
+                'mode': 'double-page',
+                # 'page': 'double',
                 'line_ksize': (12, 3),
                 'word_ksize': (8, 10)
             }
@@ -31,18 +31,18 @@ class BookReader:
         if self.config is None:
             raise ValueError("Config is not set.")
 
-        if self.config['page'] == 'double':
+        if self.config['mode'] == 'double-page':
             resized_image = imgp.resize_image(image, new_width=2000)
             pages = extractor.separate_pages(resized_image)
 
             return self.__read_page(pages[0]) + self.__read_page(pages[1])
 
-        elif self.config['page'] == 'single':
+        elif self.config['mode'] == 'single-page':
             resized_image = imgp.resize_image(image, new_width=1000)
             return self.__read_page(resized_image)
 
         else:
-            raise ValueError("This page mode isn't supported. Choose 'single' or 'double'.")
+            raise ValueError("This page mode isn't supported. Choose 'single-page' or 'double-page'.")
 
     def __read_page(self, page):
         """
@@ -50,7 +50,7 @@ class BookReader:
         :param page: image of a page
         :return: text from the page
         """
-        lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=False)
+        lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=True)
         lines_mask = extractor.extract_lines_mask(page, ksize=self.config['line_ksize'])
 
         left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
@@ -75,21 +75,21 @@ class BookReader:
         :param line: image of a line
         :return: text from the line
         """
-        if self.config['mode'] == 'line':
-            return self.detector.predict(Image.fromarray(line))
+        # if self.config['mode'] == 'line':
+        #     return self.detector.predict(Image.fromarray(line))
 
-        elif self.config['mode'] == 'word':
-            result = ""
-            words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
-            for word in words:
-                word_img = Image.fromarray(word)
-                s = self.detector.predict(word_img)
-                if len(s) == 1:
-                    if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
-                        s = '-'
-                result += s + " "
+        # elif self.config['mode'] == 'word':
+        result = ""
+        words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
+        for word in words:
+            word_img = Image.fromarray(word)
+            s = self.detector.predict(word_img)
+            if len(s) == 1:
+                if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
+                    s = '-'
+            result += s + " "
 
-            return result
+        return result
 
-        else:
-            raise ValueError("This mode isn't supported. Choose 'line', 'line-word' or 'word'.")
+        # else:
+        #     raise ValueError("This mode isn't supported. Choose 'line', 'line-word' or 'word'.")

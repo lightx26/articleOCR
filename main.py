@@ -5,7 +5,7 @@ import yaml
 
 
 def save_to_file(output_path, file_name, text):
-    with open(os.path.join(output_path, file_name), 'w') as f:
+    with open(os.path.join(output_path, file_name), 'w', encoding='utf-8') as f:
         f.write(text)
 
 
@@ -27,11 +27,9 @@ if __name__ == "__main__":
         print("Failed to load image.")
     else:
         # Set config for reader:
-        # mode: 'word' or 'line'
-        # page: 'single' or 'double'
+        # mode: 'single-page' or 'double-page'
         reader_config = {
-            'mode': 'word',
-            'page': 'double',
+            'mode': 'double-page',
             'line_ksize': (12, 3),
             'word_ksize': (8, 10)
         }

@@ -1,24 +1,19 @@
 import os
 import random
 import string
+from pathlib import Path
 
 import numpy as np
-from jdeskew.estimator import get_angle
-from jdeskew.utility import rotate
-from vietocr.tool.predictor import Predictor
-from vietocr.tool.config import Cfg
-from PIL import Image
 from img_processing import img_processing as imgp, extractor
 import cv2
 
-image_path = 'data/test/44_2.jpg'
-output_folder = 'data/output'
+image_path = 'C:\\Users\\torao\\Pictures\\Pages\\Pages\\50.jpg'
+output_folder = 'C:\\Users\\torao\\Pictures\\Pages\\Words'
+
 image = cv2.imread(image_path)
 
 image = imgp.resize_image(image, new_width=1000)
-# preprocessed1 = imgp.global_thresholding(image, True)
-# preprocessed = imgp.adaptive_thresholding(image,  blocksize=15)
-# cv2.imwrite(os.path.join(output_folder, 'oriprp.jpg'), 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4))
+
 # height, width = preprocessed.shape
 # cv2.imshow("Preprocessed image 1", preprocessed[:height//2, :])
 # cv2.imshow("Preprocessed image 2", preprocessed[height//2:, :])
@@ -33,24 +28,31 @@ image = imgp.resize_image(image, new_width=1000)
 # cv2.imshow("Dilated image 2", dilated[height//2:, :])
 # cv2.imshow("Dilated image", dilated)
 
-line_rec = extractor.detect_lines(image, (12, 3), show_result=True)[0]
-# line_prp = extractor.extract_lines_mask(image, (12, 3))
-# #
-# cv2.imwrite(os.path.join(output_folder, 'mline6.jpg'), line_rec[6][0])
+lines_bound = extractor.detect_lines(image, (12, 2), show_result=True)
+line_prp = extractor.extract_lines_mask(image, (12, 2))
 
-# for i, line in enumerate(line_prp):
-#     for j, sub_line in enumerate(line):
-#         random_name1 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-#         random_name2 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-#         cv2.imshow(random_name1, sub_line)
-#         cv2.imshow(random_name2, line_rec[i][j])
+left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
+right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1] if line[-1][2] > 500])
+
+num = 0
+for i, line in enumerate(lines_bound[0]):
+    for j, subline in enumerate(line):
+        if (lines_bound[1][i][j][0] < left_offset - 100) or (
+                lines_bound[1][i][j][0] + lines_bound[1][i][j][2] > right_offset + 100):
+            continue
+        words = extractor.detect_words_in_line(subline, line_prp[i][j], ksize=(6, 12), show_result=False)[0]
+        for k, word in enumerate(words):
+            random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+            cv2.imwrite(os.path.join(output_folder, Path(image_path).stem + f"_{num}.jpg"), word)
+            num += 1
+
+print(num)
 
 # words = extractor.detect_words_in_line(line_rec[6][0], line_prp[6][0], ksize=(6,6), show_result=True)[0]
 # for i, word in enumerate(words):
 #     random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 #     cv2.imwrite(random_name + ".jpg", word)
 # cv2.imwrite(os.path.join(output_folder, 'word.jpg'), words[0])
-
 
 
 # words = extractor.detect_words(image, (10, 6), show_result=False)[0]
@@ -61,9 +63,7 @@ line_rec = extractor.detect_lines(image, (12, 3), show_result=True)[0]
 # words = extractor.detect_words(image, (4, 2), show_result=True)[0]
 
 
-
 # kernel = cv2.getStructuringElement(cv2.MORPH_DILATE, (5, 15))
-
 
 
 # contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -73,8 +73,8 @@ line_rec = extractor.detect_lines(image, (12, 3), show_result=True)[0]
 # cv2.drawContours(image2, contours[15:20], -1, (0, 0, 255), 1)
 # cv2.drawContours(image2, [hull], -1, (0, 255, 0), 1)
 # for contour in hull:
-    # x, y, w, h = cv2.boundingRect(contour)
-    # cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
+# x, y, w, h = cv2.boundingRect(contour)
+# cv2.rectangle(image2, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
 
 # for contour in contours:
