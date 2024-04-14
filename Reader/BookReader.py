@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 import cv2
 
@@ -19,9 +20,10 @@ class BookReader:
 
         self.config = config
 
-        model_config = get_config.load_config_from_file("model\\config\\base.yml", "model\\config\\vgg-seq2seq.yml")
+        # model_config = get_config.load_config_from_file("model\\config\\base.yml", "model\\config\\vgg-seq2seq.yml")
+        model_config = Cfg.load_config_from_file("model/config/myconfig.yml")
         model_config['device'] = 'cpu'
-        model_config['weights'] = 'model/config/vgg_seq2seq.pth'
+        model_config['weights'] = 'model/config/myseq2seq.pth'
         self.detector = Predictor(model_config)
 
     def set_config(self, config):
@@ -50,7 +52,7 @@ class BookReader:
         :param page: image of a page
         :return: text from the page
         """
-        lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=True)
+        lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=False)
         lines_mask = extractor.extract_lines_mask(page, ksize=self.config['line_ksize'])
 
         left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
@@ -84,9 +86,9 @@ class BookReader:
         for word in words:
             word_img = Image.fromarray(word)
             s = self.detector.predict(word_img)
-            if len(s) == 1:
-                if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
-                    s = '-'
+            # if len(s) == 1:
+            #     if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
+            #         s = '-'
             result += s + " "
 
         return result

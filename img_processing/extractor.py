@@ -39,6 +39,7 @@ def detect_lines(image, ksize=(12, 4), show_result=False):
         lines.append(sub_line)
         lines_coor.append(sub_line_coor)
     if show_result:
+        # cv2.imwrite("lines_detected.jpg", image2)
         cv2.imshow("Lines detected", image2)
 
     return lines, lines_coor
@@ -172,7 +173,7 @@ def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
     :param show_result:
     :return: A list of images contains words (cut from original line)
     '''
-    dilated = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=1)
+    dilated = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, ksize), iterations=2)
 
     contours = imgp.find_contours(dilated)
     word_contours = imgp.filter_contours(contours, filter_object="words")
@@ -186,10 +187,7 @@ def detect_words_in_line(line, mask, ksize=(6, 6), show_result=False):
 
         if imgp.is_none_text(line[y:y + h, x:x + w]):
             continue
-        if y > 6:
-            words.append(line[y - 6:y + h + 6, x:x + w])
-        else:
-            words.append(line[y:y + h + 6, x:x + w])
+        words.append(line[y:y + h, x:x + w])
         words_coor.append((x, y, w, h))
 
     if show_result:

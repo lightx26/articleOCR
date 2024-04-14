@@ -1,4 +1,4 @@
-input_path: ./data/input
+input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages\\0410
 output_path: ./data/output
 #reader:
 #  mode: word

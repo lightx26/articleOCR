@@ -19,7 +19,7 @@ if __name__ == "__main__":
     output_path = config['output_path']
 
     # Read the image, convert it to Matrix
-    image_file = 'test.jpeg'
+    image_file = '15.jpg'
     image_path = os.path.join(input_path, image_file)
     image = cv2.imread(image_path)
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         reader_config = {
             'mode': 'double-page',
             'line_ksize': (12, 3),
-            'word_ksize': (8, 10)
+            'word_ksize': (4, 6)
         }
         reader = BookReader(reader_config)
         # Read the text from the image

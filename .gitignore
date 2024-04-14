@@ -1,6 +1,5 @@
 .venv/
 data/output/*.txt
-data/test/*.jpg
+data/test/*
 model/config/vgg_seq2seq.pth
-model/config/base.yml
-model/config/vgg-seq2seq.yml
+model/config/myseq2seq.pth
