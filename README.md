@@ -37,7 +37,7 @@ Change the value of `image_file` in `main.py` to the name of the image file you 
 ### Configure reader config
 For the best result, you can configure the reader config in `main.py` file. <br>
 - Mode `single-page` for single-page images, like: <br> <img src="https://github.com/lightx26/articleOCR/blob/952a2f562c8256f35da897703a33a279f3c14ee3/data/test/test_1.jpeg" width="200" />
-- Mode `double-page` for double-page images, like: <br> <img src="https://github.com/lightx26/articleOCR/blob/952a2f562c8256f35da897703a33a279f3c14ee3/data/test/test.jpeg" width="200" />
+- Mode `double-page` for double-page images, like: <br> <img src="https://github.com/lightx26/articleOCR/blob/952a2f562c8256f35da897703a33a279f3c14ee3/data/test/test.jpeg" width="400" />
 ### Run the application
 Run `main.py`:
 ```angular2html
