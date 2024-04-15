@@ -22,9 +22,11 @@ pip install -r requirements.txt
 ### Install config files and weights for VietOCR model
 After installing the dependencies, some files need to be downloaded and moved to the correct directories. <br>
 1. Create a directory `model/config` in the root directory of the project.
-2. Download the config files `base.yml` and `vgg-seq2seq.yml` from config folder in [_VietOCR_](https://github.com/pbcquoc/vietocr) <br>
-3. Download the weights for VietOCR model  [_here_](https://vocr.vn/data/vietocr/vgg_seq2seq.pth) (you can find it in `vgg-seq2seq.yml`).
+2. Download the config file [_here_](https://drive.google.com/file/d/1Xo9bdyp2fo-E0nGSqRsgMrXaAFBPKUO3/view?usp=drive_link) <br>
+3. Download the weights file for VietOCR model  [_here_](https://drive.google.com/file/d/1z-tXzVhp2jxdCjqKIFQt-dIL9nAFzi1X/view?usp=drive_link).
+> _Above is my config and weights, you can use the original config and weights from VietOCR repository, or use your own config and weights_ <br>
 4. Move the downloaded config and weight files to `model/config` directory.
+5. Rename the config file to `myconfig.yml` and weights file to `myseq2seq.pth`.
 
 ## Usage
 

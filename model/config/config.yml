@@ -52,9 +52,9 @@ trainer:
   export: ./weights/myseq2seq.pth
   iters: 10000
   log: ./train.log
-  metrics: 5000
+  metrics: 2000
   print_every: 200
-  valid_every: 5000
+  valid_every: 2000
 transformer:
   decoder_embedded: 256
   decoder_hidden: 256
