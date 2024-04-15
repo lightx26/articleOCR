@@ -55,16 +55,29 @@ class BookReader:
         lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=False)
         lines_mask = extractor.extract_lines_mask(page, ksize=self.config['line_ksize'])
 
-        left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
-        right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1] if line[-1][2] > 500])
+        # left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
+        # right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1] if line[-1][2] > 500])
+
+        left_offset = np.median([line[0][0] for line in lines_bound[1]])
+        right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1]])
+
+        ad_left_offset = -1
+        ad_right_offset = -1
+        if np.array([line[0][0] for line in lines_bound[1] if line[0][2] > 500]).size > 0:
+            ad_left_offset = np.min([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
+            ad_right_offset = np.max([line[-1][0] + line[-1][2] for line in lines_bound[1] if line[-1][2] > 500])
 
         result = ""
 
         for i, line in enumerate(lines_bound[0]):
             for j, subline in enumerate(line):
-                if (lines_bound[1][i][j][0] < left_offset - 100) or (
-                        lines_bound[1][i][j][0] + lines_bound[1][i][j][2] > right_offset + 100):
-                    continue
+                if ad_right_offset > -1:
+                    if (lines_bound[1][i][j][0] < ad_left_offset - 40) or (lines_bound[1][i][j][0] + lines_bound[1][i][j][2] > ad_right_offset + 40):
+                        continue
+                else:
+                    if (lines_bound[1][i][j][0] < left_offset - 100) or (
+                            lines_bound[1][i][j][0] + lines_bound[1][i][j][2] > right_offset + 100):
+                        continue
 
                 result += self.__read_line(subline, lines_mask[i][j]) + " "
             result += "\n"

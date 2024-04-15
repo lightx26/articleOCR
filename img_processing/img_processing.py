@@ -47,7 +47,8 @@ def adaptive_thresholding(image, blur=True, blocksize=15, c=8):
     if blur:
         gray_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
-    thresh_image = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, c)
+    thresh_image = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize,
+                                         c)
 
     return thresh_image
 
@@ -74,7 +75,7 @@ def filter_contours(contours, filter_object):
             # if (h > 30 and h < 150):
             # if mean_height * 0.5 < h < mean_height * 1.5:
             if 20 < h < 80 or (80 <= h <= 400 and 0.6 < w / h < 15):
-            # if True:
+                # if True:
                 filtered_contours.append(cnt)
 
     elif filter_object == "full-line":
@@ -90,15 +91,15 @@ def filter_contours(contours, filter_object):
     elif filter_object == "words":
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
+            area = cv2.contourArea(cnt)
             # if mean_height * 0.75 < h < mean_height * 1.5 and w < 100:
-            if 10 < h < 60 or (60 <= h <= 400 and 0.1 < w / h < 5):
+            if (10 < h < 60 and area > 100) or (60 <= h <= 400 and 0.1 < w / h < 5):
                 filtered_contours.append(cnt)
 
     return filtered_contours
 
 
 def sort_contours(cnts, method="left-to-right"):
-
     if len(cnts) == 0:
         return cnts, None
 
@@ -127,11 +128,11 @@ def cluster_by_line(contours, threshold=20):
         if i == 0:
             cluster.append(cnt)
             continue
-        if cv2.boundingRect(cnt)[1] - cv2.boundingRect(contours[i - 1])[1] < threshold:
-            x1, w1 = cv2.boundingRect(cnt)[0], cv2.boundingRect(cnt)[2]
-            x2, w2 = cv2.boundingRect(contours[i - 1])[0], cv2.boundingRect(contours[i - 1])[2]
+        x1, y1, w1, h1 = cv2.boundingRect(cnt)
+        x2, y2, w2, h2 = cv2.boundingRect(contours[i - 1])
+        if y1 - y2 < threshold or abs(y1 + h1 - y2 - h2) < threshold:
             # Overlap check
-            if (min(x1 + w1, x2 + w2) - max(x1, x2)) / min(w1, w2) < 0.5:
+            if (min(x1 + w1, x2 + w2) - max(x1, x2)) / min(w1, w2) < 0.25:
                 cluster.append(cnt)
                 continue
 

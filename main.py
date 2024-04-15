@@ -19,8 +19,11 @@ if __name__ == "__main__":
     output_path = config['output_path']
 
     # Read the image, convert it to Matrix
-    image_file = '15.jpg'
+    image_file = '44.jpg'
     image_path = os.path.join(input_path, image_file)
+
+    print("Reading image from " + image_path)
+
     image = cv2.imread(image_path)
 
     if image is None:
@@ -30,7 +33,7 @@ if __name__ == "__main__":
         # mode: 'single-page' or 'double-page'
         reader_config = {
             'mode': 'double-page',
-            'line_ksize': (12, 3),
+            'line_ksize': (12, 4),
             'word_ksize': (4, 6)
         }
         reader = BookReader(reader_config)
@@ -38,6 +41,7 @@ if __name__ == "__main__":
         s = reader.read(image)
         # Save the result to a file
         save_to_file(output_path, os.path.basename(image_path) + ".txt", s)
+        print("The result is saved to " + os.path.join(output_path, os.path.basename(image_path) + ".txt"))
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
