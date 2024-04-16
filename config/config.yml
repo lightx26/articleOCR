@@ -1,9 +1,14 @@
-#input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages
+input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages\\0410
 #input_path : C:\\Users\\torao\\Pictures\\Pages\\Pages_P
-input_path: ./data/input
+#input_path: ./data/input
 output_path: ./data/output
-#reader:
-#  mode: word
-#  page: double
-#  line_ksize: [12, 3]
-#  word_ksize: [8, 10]
+
+reader:
+  mode: 'double-page'
+  page: double
+  line_ksize: [12, 4]
+  word_ksize: [4, 6]
+  model:
+    device: 'cpu'
+    config: model/config/myconfig.yml
+    weights: model/config/myseq2seq_1.pth
