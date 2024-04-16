@@ -125,20 +125,30 @@ def cluster_by_line(contours, threshold=20):
     clusters = []
     cluster = []
     for i, cnt in enumerate(contours):
+        # Append the first subline to the cluster
         if i == 0:
             cluster.append(cnt)
             continue
+
         x1, y1, w1, h1 = cv2.boundingRect(cnt)
         x2, y2, w2, h2 = cv2.boundingRect(contours[i - 1])
         if y1 - y2 < threshold or abs(y1 + h1 - y2 - h2) < threshold:
             # Overlap check
-            if (min(x1 + w1, x2 + w2) - max(x1, x2)) / min(w1, w2) < 0.25:
+            is_overlap = False
+            for other_subline in cluster:
+                x3, y3, w3, h3 = cv2.boundingRect(other_subline)
+                if (min(x1 + w1, x3 + w3) - max(x1, x3)) / min(w1, w3) > 0.25:
+                    is_overlap = True
+                    break
+
+            if not is_overlap:
                 cluster.append(cnt)
                 continue
 
         cluster = sort_contours(cluster, method="left-to-right")[0]
         clusters.append(cluster)
         cluster = [cnt]
+
     cluster = sort_contours(cluster, method="left-to-right")[0]
     clusters.append(cluster)
 

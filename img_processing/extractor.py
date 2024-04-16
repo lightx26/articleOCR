@@ -13,10 +13,12 @@ def detect_lines(image, ksize=(12, 4), show_result=False):
     :param show_result:
     :return: A list of images contains text line (cut from original image) and a list of coordinates of the rectangle bounding each line
     """
-    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=15)
+    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=15, c=10)
+
+    median_blur = cv2.medianBlur(preprocessed_image, 3)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, ksize)
-    dilated = cv2.dilate(255 - preprocessed_image, kernel, iterations=2)
+    dilated = cv2.dilate(255 - median_blur, kernel, iterations=2)
 
     contours = imgp.find_contours(dilated)
     line_contours = imgp.filter_contours(contours, filter_object="lines")
@@ -55,9 +57,11 @@ def extract_lines_mask(image, ksize=(12, 4)):
     """
 
     hl_text_preprocessed = 255 - imgp.adaptive_thresholding(image, blur=False, blocksize=51, c=4)
-    preprocessed_image = 255 - imgp.adaptive_thresholding(image, blocksize=15)
+    preprocessed_image = imgp.adaptive_thresholding(image, blocksize=15, c=10)
 
-    dilated_image = cv2.dilate(preprocessed_image, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
+    median_blur = cv2.medianBlur(preprocessed_image, 3)
+
+    dilated_image = cv2.dilate(255 - median_blur, cv2.getStructuringElement(cv2.MORPH_CROSS, ksize), iterations=2)
 
     line_contours = imgp.find_contours(dilated_image)
     line_contours = imgp.filter_contours(line_contours, filter_object="lines")

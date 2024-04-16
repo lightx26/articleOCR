@@ -19,7 +19,7 @@ if __name__ == "__main__":
     output_path = config['output_path']
 
     # Read the image, convert it to Matrix
-    image_file = '44.jpg'
+    image_file = 'test.jpeg'
     image_path = os.path.join(input_path, image_file)
 
     print("Reading image from " + image_path)

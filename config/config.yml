@@ -1,5 +1,6 @@
-input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages
+#input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages
 #input_path : C:\\Users\\torao\\Pictures\\Pages\\Pages_P
+input_path: ./data/input
 output_path: ./data/output
 #reader:
 #  mode: word
