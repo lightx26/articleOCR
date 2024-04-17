@@ -1,5 +1,5 @@
 import time
-
+import argparse
 from Reader.BookReader import BookReader
 import os
 import cv2
@@ -12,7 +12,6 @@ def save_to_file(output_path, file_name, text):
 
 
 if __name__ == "__main__":
-
     # Read config file and set input/output paths
     with open("config/config.yml", "r") as f:
         config = yaml.safe_load(f)
@@ -24,9 +23,19 @@ if __name__ == "__main__":
     image_file = '3.jpg'
     image_path = os.path.join(input_path, image_file)
 
-    print("Reading image from " + image_path)
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Read text from an image and save it to a file')
 
-    image = cv2.imread(image_path)
+    # Add arguments
+    parser.add_argument('--image', '-i', required=False, default=image_path,type=str, help='Path to the input image file')
+    parser.add_argument('--destination', '-d', required=False, default=output_path, type=str, help='Path to the output text file')
+
+    # Parse các tham số từ dòng lệnh
+    args = parser.parse_args()
+
+    print("Reading image from " + args.image)
+
+    image = cv2.imread(args.image)
 
     if image is None:
         print("Failed to load image.")
@@ -41,11 +50,12 @@ if __name__ == "__main__":
         # Read the text from the image
         s = reader.read(image)
 
-        print("Time: ", time.time() - start_time)
 
         # Save the result to a file
-        save_to_file(output_path, os.path.basename(image_path) + ".txt", s)
-        print("The result is saved to " + os.path.join(output_path, os.path.basename(image_path) + ".txt"))
+        save_to_file(args.destination, os.path.basename(args.image) + ".txt", s)
+        print("Time: ", time.time() - start_time)
+        print("The result is saved to " + os.path.join(args.destination, os.path.basename(args.image) + ".txt"))
+        # print(s)
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()

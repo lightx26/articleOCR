@@ -116,9 +116,9 @@ class BookReader:
             word_img = Image.fromarray(word)
             begin_predict = time.time()
             s = self.detector.predict(word_img)
-            print("Predict time: %s seconds" % (time.time() - begin_predict))
+            # print("Predict time: %s seconds" % (time.time() - begin_predict))
             self.total_predict_time += time.time() - begin_predict
-            print("Total predict time: %s seconds" % self.total_predict_time)
+            # print("Total predict time: %s seconds" % self.total_predict_time)
             # if len(s) == 1:
             #     if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
             #         s = '-'
