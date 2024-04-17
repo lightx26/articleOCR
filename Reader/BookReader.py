@@ -40,12 +40,14 @@ class BookReader:
         if self.config['mode'] == 'double-page':
             resized_image = imgp.resize_image(image, new_width=2000)
             pages = extractor.separate_pages(resized_image)
-
-            return self.__read_page(pages[0]) + self.__read_page(pages[1])
+            page_number_1, content_1 = self.__read_page(pages[0])
+            page_number_2, content_2 = self.__read_page(pages[1])
+            return [page_number_1, page_number_2], content_1 + content_2
 
         elif self.config['mode'] == 'single-page':
             resized_image = imgp.resize_image(image, new_width=1000)
-            return self.__read_page(resized_image)
+            page_number, content = self.__read_page(resized_image)
+            return [page_number], content
 
         else:
             raise ValueError("This page mode isn't supported. Choose 'single-page' or 'double-page'.")
@@ -56,11 +58,12 @@ class BookReader:
         :param page: image of a page
         :return: text from the page
         """
+        page_number = 0
         lines_bound = extractor.detect_lines(page, ksize=self.config['line_ksize'], show_result=False)
         lines_mask = extractor.extract_lines_mask(page, ksize=self.config['line_ksize'])
 
-        # left_offset = np.median([line[0][0] for line in lines_bound[1] if line[0][2] > 500])
-        # right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1] if line[-1][2] > 500])
+        top_offset = np.min([line[0][1] for line in lines_bound[1] if line[0][2] > 500])
+        bottom_offset = np.max([line[-1][1] + line[-1][3] for line in lines_bound[1] if line[-1][2] > 500])
 
         left_offset = np.median([line[0][0] for line in lines_bound[1]])
         right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1]])
@@ -94,10 +97,20 @@ class BookReader:
                 if (x < ad_left_offset - 20 or x + w > ad_right_offset + 20) and (w < 100 or h > 200 or w/h < 2):
                     continue
 
-                result += self.__read_line(subline, lines_mask[i][j]) + " "
+                s = self.__read_line(subline, lines_mask[i][j])
+                # print(s)
+
+                if s.strip().isdigit() and (y < top_offset or y > bottom_offset):
+                    page_number = int(s)
+                    continue
+
+                result += s + " "
             result += "\n"
 
-        return result
+        if page_number == 0:
+            return None, result
+
+        return page_number, result
 
     def __read_line(self, line, line_mask):
         """

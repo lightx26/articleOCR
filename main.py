@@ -48,11 +48,21 @@ if __name__ == "__main__":
         start_time = time.time()
 
         # Read the text from the image
-        s = reader.read(image)
+        page_numbers, content = reader.read(image)
+
+        result = content
+        if page_numbers[0] is None and page_numbers[-1] is None:
+            pass
+        elif page_numbers[0] is None:
+            page_numbers[0] = page_numbers[-1] - 1
+            result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
+        elif page_numbers[1] is None:
+            page_numbers[1] = page_numbers[0] + 1
+            result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
 
 
         # Save the result to a file
-        save_to_file(args.destination, os.path.basename(args.image) + ".txt", s)
+        save_to_file(args.destination, os.path.basename(args.image) + ".txt", result)
         print("Time: ", time.time() - start_time)
         print("The result is saved to " + os.path.join(args.destination, os.path.basename(args.image) + ".txt"))
         # print(s)
