@@ -29,6 +29,7 @@ if __name__ == "__main__":
     # Add arguments
     parser.add_argument('--image', '-i', required=False, default=image_path,type=str, help='Path to the input image file')
     parser.add_argument('--destination', '-d', required=False, default=output_path, type=str, help='Path to the output text file')
+    parser.add_argument('--mode', '-m', required=False, default='double-page', type=str, help='Mode of reading (single-page or double-page)')
 
     # Parse các tham số từ dòng lệnh
     args = parser.parse_args()
@@ -43,6 +44,8 @@ if __name__ == "__main__":
         # Set config for reader:
         # mode: 'single-page' or 'double-page'
         reader_config = config['reader']
+        reader_config['mode'] = args.mode
+
         reader = BookReader(reader_config)
 
         start_time = time.time()

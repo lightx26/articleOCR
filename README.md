@@ -30,21 +30,29 @@ After installing the dependencies, some files need to be downloaded and moved to
 
 ## Usage
 
-### Set up input image
-Get the image file of the article you want to extract text from and put it in the `data/input` directory. <br>
-> You can change the path to the input image in `config/config.yml` file. <br>
+[//]: # (### Set up input image)
 
-Change the value of `image_file` in `main.py` to the name of the image file you want to extract text from.
+[//]: # (Get the image file of the article you want to extract text from and put it in the `data/input` directory. <br>)
+
+[//]: # (> You can change the path to the input image in `config/config.yml` file. <br>)
+
+[//]: # ()
+[//]: # (Change the value of `image_file` in `main.py` to the name of the image file you want to extract text from.)
 
 ### Configure reader config
-For the best result, you can configure the reader config in `main.py` file. <br>
+For the best result, you can configure the reader config in `config/config.yml` file. <br>
 - Mode `single-page` for single-page images, like: <br> <img src="https://github.com/lightx26/articleOCR/blob/952a2f562c8256f35da897703a33a279f3c14ee3/data/test/test_1.jpeg" width="200" />
 - Mode `double-page` for double-page images, like: <br> <img src="https://github.com/lightx26/articleOCR/blob/952a2f562c8256f35da897703a33a279f3c14ee3/data/test/test.jpeg" width="400" />
 ### Run the application
 Run `main.py`:
 ```angular2html
-python main.py
+python main.py -i <image_file> -m <mode> -d <destination>
 ```
+
+Flags:
+- `--image` or `-i`: The path to the image file you want to extract text from.
+- `--mode` or `-m`: The mode of the image file, `single-page` or `double-page`. Default is `double-page`.
+- `--destination` or `-d`: The name of the output text file. Default is `data/output`.
 ### Output
-The extracted text will be saved in `data/output` directory with the same name as the input image file.
-> You can change the path to the output text file in `config/config.yml` file. <br>
+The extracted text will be saved in `destination` directory with the same name as the input image file.
+> You can change the default directory contains output text in `config/config.yml` file. <br>
