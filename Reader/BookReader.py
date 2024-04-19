@@ -4,11 +4,7 @@ import numpy as np
 from PIL import Image
 from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
-import cv2
-
 from img_processing import img_processing as imgp, extractor
-from model.utils import get_config
-
 
 class BookReader:
     def __init__(self, config=None):
