@@ -17,10 +17,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     input_path = config['input_path']
-    output_path = config['output_path']
-
-    # Read the image, convert it to Matrix
-    image_file = '3.jpg'
+    image_file = '1904_4.jpg'
     image_path = os.path.join(input_path, image_file)
 
     # Create an argument parser
@@ -28,12 +25,13 @@ if __name__ == "__main__":
 
     # Add arguments
     parser.add_argument('--image', '-i', required=False, default=image_path,type=str, help='Path to the input image file')
-    parser.add_argument('--destination', '-d', required=False, default=output_path, type=str, help='Path to the output text file')
-    parser.add_argument('--mode', '-m', required=False, default='double-page', type=str, help='Mode of reading (single-page or double-page)')
+    parser.add_argument('--destination', '-d', required=False, default=config['output_path'], type=str, help='Path to the output text file')
+    parser.add_argument('--mode', '-m', required=False, default=config['reader']['mode'], type=str, help='Mode of reading (single-page or double-page)')
 
     # Parse các tham số từ dòng lệnh
     args = parser.parse_args()
 
+    # Read image
     print("Reading image from " + args.image)
 
     image = cv2.imread(args.image)
@@ -56,11 +54,11 @@ if __name__ == "__main__":
         result = content
         if page_numbers[0] is None and page_numbers[-1] is None:
             pass
-        elif page_numbers[0] is None:
-            page_numbers[0] = page_numbers[-1] - 1
-            result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
-        elif page_numbers[1] is None:
-            page_numbers[1] = page_numbers[0] + 1
+        else:
+            if page_numbers[0] is None:
+                page_numbers[0] = page_numbers[-1] - 1
+            elif page_numbers[-1] is None:
+                page_numbers[-1] = page_numbers[0] + 1
             result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
 
 

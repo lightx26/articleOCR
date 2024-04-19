@@ -4,32 +4,47 @@ import string
 from pathlib import Path
 
 import numpy as np
+import yaml
+from PIL import Image
+from vietocr.tool.config import Cfg
+from vietocr.tool.predictor import Predictor
+
 from img_processing import img_processing as imgp, extractor
 import cv2
 from jdeskew.estimator import get_angle
 from jdeskew.utility import rotate
 
-image_path = "data/input/test.jpeg"
+image_path = "data/output/clz.jpg"
 output_folder = "data/output"
 
 image = cv2.imread(image_path)
 
-image = imgp.resize_image(image, new_width=2000)
-image = extractor.separate_pages(image)[0]
+with open("config/config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
-line_ksize = (12, 4)
-word_ksize = (4, 6)
+model_config = Cfg.load_config_from_file(config['reader']['model']['config'])
+model_config['device'] = 'cpu'
+model_config['weights'] = config['reader']['model']['weights']
+detector = Predictor(model_config)
 
-preprocessed_image = imgp.adaptive_thresholding(image, c=10)
-cv2.imshow("preprocessed: ", preprocessed_image)
+print(detector.predict(Image.fromarray(image), return_prob=True))
 
-median_blur = cv2.medianBlur(preprocessed_image, 3)
-cv2.imshow('median_blur', median_blur)
+# image = imgp.resize_image(image, new_width=2000)
+# image = extractor.separate_pages(image)[0]
 
-kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, line_ksize)
-dilated = cv2.dilate(255 - median_blur, kernel, iterations=2)
-
-cv2.imshow("dilated: ", dilated[dilated.shape[0] // 2 - 100:, :])
+# line_ksize = (12, 4)
+# word_ksize = (4, 6)
+#
+# preprocessed_image = imgp.adaptive_thresholding(image, c=10)
+# cv2.imshow("preprocessed: ", preprocessed_image)
+#
+# median_blur = cv2.medianBlur(preprocessed_image, 3)
+# cv2.imshow('median_blur', median_blur)
+#
+# kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, line_ksize)
+# dilated = cv2.dilate(255 - median_blur, kernel, iterations=2)
+#
+# cv2.imshow("dilated: ", dilated[dilated.shape[0] // 2 - 100:, :])
 
 # lines_bound = extractor.detect_lines(image, ksize=line_ksize, show_result=True)
 # line_prp = extractor.extract_lines_mask(image, ksize=line_ksize)
