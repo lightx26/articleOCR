@@ -3,3 +3,4 @@ data/output/*.txt
 data/test/*
 model/config/vgg_seq2seq.pth
 model/config/*.pth
+**/__pycache__/
