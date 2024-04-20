@@ -6,6 +6,7 @@ from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 from img_processing import img_processing as imgp, extractor
 
+
 class BookReader:
     def __init__(self, config=None):
         if config is None:
@@ -64,6 +65,7 @@ class BookReader:
         left_offset = np.median([line[0][0] for line in lines_bound[1]])
         right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1]])
 
+        words_img = []
         result = ""
 
         for i, line in enumerate(lines_bound[0]):
@@ -90,18 +92,27 @@ class BookReader:
 
             for j, subline in enumerate(line):
                 x, y, w, h = lines_bound[1][i][j]
-                if (x < ad_left_offset - 20 or x + w > ad_right_offset + 20) and (w < 100 or h > 200 or w/h < 2):
+
+                if (x < ad_left_offset - 20 or x + w > ad_right_offset + 20) and (w < 100 or h > 200 or w / h < 2):
                     continue
 
-                s = self.__read_line(subline, lines_mask[i][j])
-                # print(s)
+                if w < 100 and (y < top_offset or y > bottom_offset):
+                    s = self.detector.predict(Image.fromarray(subline))
+                    if s.isdigit():
+                        page_number = int(s)
+                        continue
 
-                if s.strip().isdigit() and (y < top_offset or y > bottom_offset):
-                    page_number = int(s)
-                    continue
+                # result += self.__read_line(subline, lines_mask[i][j]) + " "
 
-                result += s + " "
-            result += "\n"
+            # result += "\n"
+
+            words_img.extend(self.__batch_line(subline, lines_mask[i][j]))
+
+        words_img = [Image.fromarray(word) for word in words_img]
+        begin_predict = time.time()
+        result = " ".join(self.detector.predict_batch(words_img))
+        # result = ""
+        print("Predict time: %s seconds" % (time.time() - begin_predict))
 
         if page_number == 0:
             return None, result
@@ -114,26 +125,37 @@ class BookReader:
         :param line: image of a line
         :return: text from the line
         """
+        words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
+        # words_img = [Image.fromarray(word) for word in words]
+        result = ""
+        for word in words:
+            s = self.detector.predict(Image.fromarray(word))
+            result += s + " "
+        # return " ".join(self.detector.predict_batch(words_img))
+        return result
+
+    def __batch_line(self, line, line_mask):
         # if self.config['mode'] == 'line':
         #     return self.detector.predict(Image.fromarray(line))
 
         # elif self.config['mode'] == 'word':
 
-        result = ""
-        words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
-        for word in words:
-            word_img = Image.fromarray(word)
-            begin_predict = time.time()
-            s = self.detector.predict(word_img)
-            # print("Predict time: %s seconds" % (time.time() - begin_predict))
-            self.total_predict_time += time.time() - begin_predict
-            # print("Total predict time: %s seconds" % self.total_predict_time)
-            # if len(s) == 1:
-            #     if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
-            #         s = '-'
-            result += s + " "
+        # result = ""
+        return extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
+        # return [Image.fromarray(word) for word in words]
 
-        return result
+        # words_img = np.asarray(words_img)
+        # begin_predict = time.time()
+        # s = self.detector.predict_batch(words)
+        # print("Predict time: %s seconds" % (time.time() - begin_predict))
+        # self.total_predict_time += time.time() - begin_predict
+        # print("Total predict time: %s seconds" % self.total_predict_time)
+        # if len(s) == 1:
+        #     if not imgp.is_char_ratio(char_shape=word.shape, line_shape=line.shape):
+        #         s = '-'
+        # result += s + " "
 
+        # return " ".join(s)
+        # return words_img
         # else:
         #     raise ValueError("This mode isn't supported. Choose 'line', 'line-word' or 'word'.")
