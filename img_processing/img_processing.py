@@ -121,7 +121,7 @@ def sort_contours(cnts, method="left-to-right"):
     return cnts, boundingBoxes
 
 
-def cluster_by_line(contours, threshold=20):
+def cluster_by_line(contours):
     clusters = []
     cluster = []
     for i, cnt in enumerate(contours):
@@ -132,7 +132,7 @@ def cluster_by_line(contours, threshold=20):
 
         x1, y1, w1, h1 = cv2.boundingRect(cnt)
         x2, y2, w2, h2 = cv2.boundingRect(contours[i - 1])
-        if y1 - y2 < threshold or abs(y1 + h1 - y2 - h2) < threshold:
+        if y1 - y2 < 15 or y1 - y2 + abs(y1 + h1 - y2 - h2) < 40:
             # Overlap check
             is_overlap = False
             for other_subline in cluster:

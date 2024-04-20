@@ -1,6 +1,6 @@
-input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages\\0410
+#input_path: C:\\Users\\torao\\Pictures\\Pages\\Pages\\0410
 #input_path : C:\\Users\\torao\\Pictures\\Pages\\Pages_P
-#input_path: ./data/input
+input_path: ./data/input
 output_path: ./data/output
 
 reader:

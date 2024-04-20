@@ -17,7 +17,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     input_path = config['input_path']
-    image_file = '3.jpg'
+    image_file = '40_1.jpg'
     image_path = os.path.join(input_path, image_file)
 
     # Create an argument parser
