@@ -1,5 +1,8 @@
 import time
 import argparse
+
+import numpy as np
+
 from Reader.BookReader import BookReader
 import os
 import cv2
@@ -17,7 +20,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     input_path = config['input_path']
-    image_file = '40_1.jpg'
+    image_file = 'test.jpeg'
     image_path = os.path.join(input_path, image_file)
 
     # Create an argument parser
@@ -51,6 +54,10 @@ if __name__ == "__main__":
         # Read the text from the image
         page_numbers, content = reader.read(image)
 
+        # print("Average time per sequence: ", np.mean(reader.total_predict_time))
+        # print("Total time: ", np.sum(reader.total_predict_time))
+
+
         result = content
         if page_numbers[0] is None and page_numbers[-1] is None:
             pass
@@ -60,7 +67,6 @@ if __name__ == "__main__":
             elif page_numbers[-1] is None:
                 page_numbers[-1] = page_numbers[0] + 1
             result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
-
 
         # Save the result to a file
         save_to_file(args.destination, os.path.basename(args.image) + ".txt", result)

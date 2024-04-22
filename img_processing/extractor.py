@@ -41,7 +41,8 @@ def detect_lines(image, ksize=(12, 4), show_result=False):
         lines.append(sub_line)
         lines_coor.append(sub_line_coor)
     if show_result:
-        random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+        # random_name = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+        random_name = "detected_lines"
         cv2.imwrite(random_name + ".jpg", image2)
         # cv2.imshow("Lines detected", image2)
 

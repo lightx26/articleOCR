@@ -25,8 +25,6 @@ class BookReader:
         model_config['weights'] = config['model']['weights']
         self.detector = Predictor(model_config)
 
-        self.total_predict_time = 0
-
     def set_config(self, config):
         self.config = config
 
@@ -178,15 +176,20 @@ class BookReader:
     #
     #     return page_number, result
 
-    def __read_line(self, line, line_mask):
-        """
-        Read text from a line
-        :param line: image of a line
-        :return: text from the line
-        """
-        words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
-        words_img = [Image.fromarray(word) for word in words]
-        return " ".join(self.detector.predict_batch(words_img))
+    # def __read_line(self, line, line_mask):
+    #     """
+    #     Read text from a line
+    #     :param line: image of a line
+    #     :return: text from the line
+    #     """
+    #     words = extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]
+    #     for word in words:
+    #         begin_time = time.time()
+    #         self.detector.predict(Image.fromarray(word))
+    #         print("Predict time: %s seconds" % (time.time() - begin_time))
+    #         self.total_predict_time.append(time.time() - begin_time)
+        # words_img = [Image.fromarray(word) for word in words]
+        # return " ".join(self.detector.predict_batch(words_img))
 
     def __batch_line(self, line, line_mask):
         return extractor.detect_words_in_line(line, line_mask, ksize=self.config['word_ksize'], show_result=False)[0]

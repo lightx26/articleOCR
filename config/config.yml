@@ -9,5 +9,7 @@ reader:
   word_ksize: [4, 6]
   model:
     device: 'cpu'
-    config: model/config/myconfig.yml
-    weights: model/config/myseq2seq_1.pth
+    config: model/config/myconfig_vgg11.yml
+    weights: model/config/myseq2seq_vgg11_2204.pth
+#    config: model/config/myconfig.yml
+#    weights: model/config/myseq2seq_1.pth
