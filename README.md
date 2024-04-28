@@ -1,3 +1,5 @@
+> **Please switch to branch single_thread to use these features**
+
 # ArticleOCR: Extract text from images of articles
 
 ArticleOCR: Extract Text from Images of Articles <br>
