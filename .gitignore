@@ -1,5 +1,6 @@
 .venv/
 data/output/*.txt
+data/audio/*
 data/test/*
 model/config/*.pth
 test.py
