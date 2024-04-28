@@ -58,4 +58,4 @@ class BookReader:
         return [Image.fromarray(word) for word in words]
 
     def read_word(self, word):
-        return self.detector.predict(word)
+        return self.detector.predict(Image.fromarray(word))

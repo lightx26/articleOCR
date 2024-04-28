@@ -1,17 +1,12 @@
 import time
 import argparse
 
-import numpy as np
-
-from Reader.BookReader import BookReader
 import os
 import cv2
 import yaml
-from utils import FileHandler
 from AppThread.ReadThread import ReadThread
-from AppThread.ExportThread import ExportThread, generate_audio
+from AppThread.ExportThread import ExportThread
 from queue import Queue
-
 
 
 if __name__ == "__main__":
@@ -31,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument('--destination', '-d', required=False, default=config['output_path'], type=str, help='Path to the output text file')
     parser.add_argument('--mode', '-m', required=False, default=config['reader']['mode'], type=str, help='Mode of reading (single-page or double-page)')
 
-    # Parse các tham số từ dòng lệnh
+    # Parse parameters from command line
     args = parser.parse_args()
 
     # Read image
@@ -49,10 +44,11 @@ if __name__ == "__main__":
 
         start_time = time.time()
 
+        text_output_path = os.path.join(args.destination, os.path.basename(args.image))
         q = Queue()
 
         read_thread = ReadThread(image, reader_config, q)
-        export_thread = ExportThread(q, read_thread.finished_event, start_time)
+        export_thread = ExportThread(text_output_path, q, read_thread.read_finished_event, start_time)
 
         read_thread.start()
         export_thread.start()

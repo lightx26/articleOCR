@@ -1,61 +1,43 @@
+import os
 import queue
 import threading
-import time
-
-import winsound
-import requests
-import json
-
+from pathlib import Path
 from AppThread.AudioThread import AudioThread
+from utils import FileHandler
 
 
 class ExportThread(threading.Thread):
-    def __init__(self, nqueue, read_thread_finished_event, begin_time=0):
+    def __init__(self, output_path, text_queue, read_thread_finished_event, start_time=0):
         super().__init__()
-        self.buffer_text = nqueue
-        self.finished_event = read_thread_finished_event
-        self.begin_time = begin_time
-        self.finished_event = threading.Event()
+        self.output_path = output_path
+        self.buffer_text = text_queue
+        self.read_finished_event = read_thread_finished_event
+        self.export_finished_event = threading.Event()
+        self.start_time = start_time
 
     def run(self):
-        line_idx = 0
         audio_queue = queue.Queue()
-        audio_thread = AudioThread(audio_queue, self.finished_event)
+        audio_thread = AudioThread(audio_queue, self.export_finished_event, self.start_time)
         audio_thread.start()
-        while not (self.finished_event.is_set() and self.buffer_text.empty()):  # Check for read_thread completion
+
+        line_idx = 0
+        while not (self.read_finished_event.is_set() and self.buffer_text.empty()):
             try:
-                text = self.buffer_text.get(timeout=1)  # Non-blocking queue access
-                des_name = f"data/output/tmp_{line_idx}.wav"
-                generate_audio("hn-phuongtrang", text, des_name)
+                text = self.buffer_text.get(timeout=1)
+
+                # Export text file
+                FileHandler.write_text(self.output_path + ".txt", text + "\n")
+                # Export audio file
+                os.makedirs(os.path.join(Path(self.output_path).parent.parent, "audio", os.path.basename(self.output_path)), exist_ok=True)
+                des_name = os.path.join(Path(self.output_path).parent.parent, "audio", os.path.basename(self.output_path), f"line_{line_idx}.wav")
+                FileHandler.generate_audio("hn-phuongtrang", text, des_name)
                 audio_queue.put(des_name)
-                # print("Start playing audio: ", time.time() - self.begin_time)
-                # winsound.PlaySound("data/output/tmp.wav", winsound.SND_FILENAME)
+
+                line_idx += 1
+
             except queue.Empty:
-                pass  # Handle empty queue gracefully
+                pass
 
-        print("Read thread finished, export thread exiting.")
-        self.finished_event.set()
+        self.export_finished_event.set()
 
-def generate_audio(voice, text, des_name):
-    url = "https://viettelgroup.ai/voice/api/tts/v1/rest/syn"
-    data = {
-        "text": text,
-        "voice": voice,
-        "id": "2",
-        "without_filter": False,
-        "speed": 1.0,
-        "tts_return_option": 2
-    }
-    headers = {'Content-type': 'application/json',
-               'token': 'dw1EEOdB48eqoIvopUZwOuT-gkZ4zzrvGHNIuVzPTlnAkUUiPWnUN-yTPJtZSNo2'}
-    response = requests.post(url, data=json.dumps(data), headers=headers)
-    if response.status_code == 200:
-
-        data = response.content
-        # Thay localpath
-        file_path = f"{des_name}"  # thay path
-        with open(file_path, "wb") as file:
-            file.write(data)
-
-    else:
-        print("Không thể tạo file âm thanh. Mã trạng thái:", response.status_code)
+        audio_thread.join()
