@@ -16,7 +16,7 @@ class AudioThread(Thread):
         while not (self.export_finished_event.is_set() and self.buffer_audio.empty()):
             try:
                 audio_path = self.buffer_audio.get(timeout=1)
-                print("Start playing audio after: ", time.time() - self.start_time, "s")
+                print("Start playing audio after: ", time.time() - self.start_time, "s", sep="")
                 winsound.PlaySound(audio_path, winsound.SND_FILENAME)
             except queue.Empty:
                 pass
