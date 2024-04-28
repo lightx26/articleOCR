@@ -1,17 +1,12 @@
 import time
 import argparse
 
-import numpy as np
-
-from Reader.BookReader import BookReader
 import os
 import cv2
 import yaml
-
-
-def save_to_file(output_path, file_name, text):
-    with open(os.path.join(output_path, file_name), 'w', encoding='utf-8') as f:
-        f.write(text)
+from AppThread.ReadThread import ReadThread
+from AppThread.ExportThread import ExportThread
+from queue import Queue
 
 
 if __name__ == "__main__":
@@ -31,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument('--destination', '-d', required=False, default=config['output_path'], type=str, help='Path to the output text file')
     parser.add_argument('--mode', '-m', required=False, default=config['reader']['mode'], type=str, help='Mode of reading (single-page or double-page)')
 
-    # Parse các tham số từ dòng lệnh
+    # Parse parameters from command line
     args = parser.parse_args()
 
     # Read image
@@ -47,32 +42,16 @@ if __name__ == "__main__":
         reader_config = config['reader']
         reader_config['mode'] = args.mode
 
-        reader = BookReader(reader_config)
-
         start_time = time.time()
 
-        # Read the text from the image
-        page_numbers, content = reader.read(image)
+        text_output_path = os.path.join(args.destination, os.path.basename(args.image))
+        q = Queue()
 
-        # print("Average time per sequence: ", np.mean(reader.total_predict_time))
-        # print("Total time: ", np.sum(reader.total_predict_time))
+        read_thread = ReadThread(image, reader_config, q)
+        export_thread = ExportThread(text_output_path, q, read_thread.read_finished_event, start_time)
 
+        read_thread.start()
+        export_thread.start()
 
-        result = content
-        if page_numbers[0] is None and page_numbers[-1] is None:
-            pass
-        else:
-            if page_numbers[0] is None:
-                page_numbers[0] = page_numbers[-1] - 1
-            elif page_numbers[-1] is None:
-                page_numbers[-1] = page_numbers[0] + 1
-            result = "Trang " + ",".join(map(str, page_numbers)) + ".\n" + content
-
-        # Save the result to a file
-        save_to_file(args.destination, os.path.basename(args.image) + ".txt", result)
-        print("Time: ", time.time() - start_time)
-        print("The result is saved to " + os.path.join(args.destination, os.path.basename(args.image) + ".txt"))
-        # print(s)
-
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+        read_thread.join()
+        export_thread.join()
