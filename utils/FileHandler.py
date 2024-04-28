@@ -26,7 +26,6 @@ def generate_audio(voice, text, des_name):
                'token': 'dw1EEOdB48eqoIvopUZwOuT-gkZ4zzrvGHNIuVzPTlnAkUUiPWnUN-yTPJtZSNo2'}
     response = requests.post(url, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
-
         data = response.content
         # Thay localpath
         file_path = f"{des_name}"  # thay path

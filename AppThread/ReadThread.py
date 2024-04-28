@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import threading
 from Reader.BookReader import BookReader
@@ -5,12 +7,13 @@ from img_processing import extractor
 
 
 class ReadThread(threading.Thread):
-    def __init__(self, image, config, text_queue):
+    def __init__(self, image, config, text_queue, start_time=0):
         super().__init__()
         self.image = image
         self.reader = BookReader(config)
         self.buffer_text = text_queue
         self.read_finished_event = threading.Event()
+        self.start_time = start_time
 
     def run(self):
         pages = self.reader.make_pages(self.image)
@@ -75,5 +78,6 @@ class ReadThread(threading.Thread):
                     mini_seq = self.reader.detector.predict(word)
                     s = s + mini_seq + " "
                     if mini_seq[-1] in [".", "?", "!", ":", ";"]:
-                        self.buffer_text.put(s)
+                        print("Line after: ", time.time() - self.start_time, "s", sep="")
+                        self.buffer_text.put_nowait(s)
                         s = ""

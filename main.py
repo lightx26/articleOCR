@@ -45,9 +45,9 @@ if __name__ == "__main__":
         start_time = time.time()
 
         text_output_path = os.path.join(args.destination, os.path.basename(args.image))
-        q = Queue()
+        q = Queue(maxsize=200)
 
-        read_thread = ReadThread(image, reader_config, q)
+        read_thread = ReadThread(image, reader_config, q, start_time)
         export_thread = ExportThread(text_output_path, q, read_thread.read_finished_event, start_time)
 
         read_thread.start()
