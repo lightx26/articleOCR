@@ -44,7 +44,8 @@ class ReadThread(threading.Thread):
         right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1]])
 
         words_batch = []
-        half_page_flag = False
+        num_of_part = 3
+        idx_active = len(lines_bound[0]) // num_of_part
         for i, line in enumerate(lines_bound[0]):
             try:
                 left = i - 5
@@ -76,16 +77,9 @@ class ReadThread(threading.Thread):
                 words = self.reader.get_words_in_line(subline, lines_mask[i][j])
                 words_batch.extend(words)
 
-                if y > (top_offset + bottom_offset) / 2 and half_page_flag == False:
+                if i % idx_active == 0 and 0 < i // idx_active < num_of_part:
                     self.buffer_text.put_nowait(self.reader.read_batch(words_batch))
                     words_batch = []
-                    half_page_flag = True
-                # for word in words:
-                #     mini_seq = self.reader.detector.predict(word)
-                #     s = s + mini_seq + " "
-                #     if mini_seq[-1] in [".", "?", "!", ":", ";"]:
-                #         print("Line after: ", time.time() - self.start_time, "s", sep="")
-                #         self.buffer_text.put_nowait(s)
-                #         s = ""
+
         self.buffer_text.put_nowait(self.reader.read_batch(words_batch))
         print("Page after: ", time.time() - self.start_time, "s", sep="")
