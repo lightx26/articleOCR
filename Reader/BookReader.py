@@ -59,3 +59,6 @@ class BookReader:
 
     def read_word(self, word):
         return self.detector.predict(Image.fromarray(word))
+
+    def read_batch(self, words):
+        return " ".join(self.detector.predict_batch(words))

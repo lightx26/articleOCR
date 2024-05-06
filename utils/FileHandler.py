@@ -23,7 +23,7 @@ def generate_audio(voice, text, des_name):
         "tts_return_option": 2
     }
     headers = {'Content-type': 'application/json',
-               'token': 'dw1EEOdB48eqoIvopUZwOuT-gkZ4zzrvGHNIuVzPTlnAkUUiPWnUN-yTPJtZSNo2'}
+               'token': 'Di9D8pstF-YM6qxtxQ3GyWNDoBk0CAHR7uxpu0e10la9qbcDK8EmFJQtjDF2Fs2r'}
     response = requests.post(url, data=json.dumps(data), headers=headers)
     if response.status_code == 200:
         data = response.content

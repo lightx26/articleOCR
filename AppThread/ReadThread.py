@@ -43,7 +43,7 @@ class ReadThread(threading.Thread):
         left_offset = np.median([line[0][0] for line in lines_bound[1]])
         right_offset = np.median([line[-1][0] + line[-1][2] for line in lines_bound[1]])
 
-        s = ""
+        words_batch = []
         for i, line in enumerate(lines_bound[0]):
             try:
                 left = i - 5
@@ -73,11 +73,14 @@ class ReadThread(threading.Thread):
                     continue
 
                 words = self.reader.get_words_in_line(subline, lines_mask[i][j])
+                words_batch.extend(words)
 
-                for word in words:
-                    mini_seq = self.reader.detector.predict(word)
-                    s = s + mini_seq + " "
-                    if mini_seq[-1] in [".", "?", "!", ":", ";"]:
-                        print("Line after: ", time.time() - self.start_time, "s", sep="")
-                        self.buffer_text.put_nowait(s)
-                        s = ""
+                # for word in words:
+                #     mini_seq = self.reader.detector.predict(word)
+                #     s = s + mini_seq + " "
+                #     if mini_seq[-1] in [".", "?", "!", ":", ";"]:
+                #         print("Line after: ", time.time() - self.start_time, "s", sep="")
+                #         self.buffer_text.put_nowait(s)
+                #         s = ""
+        print("Page after: ", time.time() - self.start_time, "s", sep="")
+        self.buffer_text.put_nowait(self.reader.read_batch(words_batch))
